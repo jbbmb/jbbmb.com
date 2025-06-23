@@ -3,7 +3,7 @@
 </p>
 
 ## 🔌 Service Status
-You can always check if everything is up and running at [UptimeRobot](http://status.jbbmb.com).
+You can always check if everything is up and running at [status.jbbmb.com](http://status.jbbmb.com).
 
 ## 🫶 Contributors
 This project got a lot of love and support from [Mário Matias](https://www.linkedin.com/in/jmamatias), [Francisco Araújo](https://www.linkedin.com/in/franciscoeparaujo), [Miguel Martins](https://instagram.com/miguelmartinsmm), [Mariana Preto](https://www.linkedin.com/in/mariana-preto) and [Pedro Mouta](https://www.linkedin.com/in/pedro-mouta-52080124a).
