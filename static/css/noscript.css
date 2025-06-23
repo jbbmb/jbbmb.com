@@ -1,0 +1,14 @@
+/* Base */
+video,
+.bottom-section {
+    display: none;
+}
+
+/* Warning */
+#greeting::before {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--accent-color);
+    animation: onHoverBounce 0.5s var(--effect-timing);
+    content: 'Please enable JavaScript to use this website.';
+}

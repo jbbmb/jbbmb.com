@@ -1,0 +1,303 @@
+/* Base */
+:root {
+  --accent-color: #fc9e0e;
+  --effect-timing: ease;
+}
+
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("Inter-Regular.woff2") format("woff2");
+}
+
+@keyframes blurIn {
+  0% {
+    opacity: 0;
+    filter: blur(5px);
+  }
+
+  50% {
+    opacity: 0.5;
+    filter: blur(2.5px);
+  }
+
+  100% {
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+
+@keyframes onHoverBounce {
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.25);
+  }
+
+  100% {
+    transform: scale(1.2);
+  }
+}
+
+@keyframes offHoverBounce {
+  0% {
+    transform: scale(1.1);
+  }
+
+  50% {
+    transform: scale(0.95);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes clickBounce {
+  0% {
+    transform: scale(1.2);
+  }
+
+  100% {
+    transform: scale(1.4);
+  }
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+  vertical-align: baseline;
+  -webkit-touch-callout: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-drag: none;
+  -webkit-user-drag: none;
+  -moz-user-drag: none;
+  -ms-user-drag: none;
+}
+
+html,
+body {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  background-color: #000;
+  z-index: 0;
+}
+
+/* Background Video */
+#bg-video {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  object-fit: cover;
+  object-position: center;
+  z-index: 1;
+  background-color: #000;
+}
+
+/* Layout */
+.page-content {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2rem;
+  color: #fff;
+  text-align: center;
+  z-index: 2;
+}
+
+/* Top Signature and Tagline */
+.top-section {
+  opacity: 0;
+  animation: blurIn 1s var(--effect-timing) forwards;
+}
+
+.top-section .logo {
+  max-width: 400px;
+  height: auto;
+  width: 100%;
+  margin-top: 2rem;
+}
+
+#greeting {
+  display: block;
+  font-size: 1rem;
+  animation: offHoverBounce 0.5s var(--effect-timing);
+  will-change: scale;
+}
+
+#description {
+  display: none;
+  font-size: 1rem;
+  animation: onHoverBounce 0.5s var(--effect-timing);
+  transform: scale(1.2);
+  will-change: scale;
+}
+
+#action {
+  display: none;
+  font-size: 1rem;
+  font-weight: bold;
+  color: var(--accent-color);
+  animation: onHoverBounce 0.5s var(--effect-timing);
+  transform: scale(1.2);
+  will-change: scale;
+}
+
+.dud {
+  opacity: 0.8;
+  color: var(--accent-color);
+}
+
+/* Bottom Liquid Glass Icons */
+.bottom-section {
+  display: flex;
+  gap: 1.1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin: 10rem 2rem 2rem 2rem;
+}
+
+.glass-icon {
+  --bg-color:
+    linear-gradient(135deg,
+      rgba(255, 255, 255, 0.65) 0%,
+      rgba(255, 255, 255, 0.45) 50%,
+      rgba(255, 255, 255, 0.25) 100%);
+  --highlight: rgba(255, 255, 255, 0.75);
+  --icon-size: 65px;
+  padding: 0.65rem;
+  position: relative;
+  width: var(--icon-size);
+  height: var(--icon-size);
+  border-radius: 50%;
+  overflow: hidden;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: offHoverBounce 0.5s var(--effect-timing);
+  will-change: scale;
+}
+
+@media (hover : hover) {
+
+  .glass-icon:hover,
+  .glass-icon:focus {
+    animation: onHoverBounce 0.5s var(--effect-timing);
+    transform: scale(1.2);
+    will-change: scale;
+
+    .glass-content img {
+      animation: onHoverBounce 0.5s var(--effect-timing);
+      transform: scale(1.2);
+      will-change: scale;
+    }
+  }
+}
+
+.glass-icon:active {
+  animation: clickBounce 0.5s var(--effect-timing);
+  transform: scale(1.4);
+  will-change: scale;
+
+  .glass-filter {
+    filter: brightness(2.30);
+  }
+
+  .glass-content img {
+    opacity: 0.5;
+    animation: clickBounce 0.5s var(--effect-timing);
+    transform: scale(1.4);
+    will-change: scale;
+  }
+}
+
+.glass-filter,
+.glass-overlay,
+.glass-specular {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+
+.glass-filter {
+  z-index: 3;
+  backdrop-filter: blur(4px) brightness(1);
+  filter: url(#glass-distortion) saturate(120%) brightness(1.15);
+}
+
+.glass-overlay {
+  z-index: 4;
+  background: var(--bg-color);
+}
+
+.glass-specular {
+  z-index: 5;
+  box-shadow:
+    inset 1px 1px 1px var(--highlight),
+    inset -1px -1px 1px var(--highlight);
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: none;
+  transition: background 0.05s var(--effect-timing);
+  mask-image: radial-gradient(circle, rgba(0, 0, 0, 1) 65%, rgba(0, 0, 0, 0) 80%);
+}
+
+.glass-content {
+  position: relative;
+  z-index: 4;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: none;
+  cursor: pointer;
+  background: transparent;
+}
+
+.glass-content img {
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  animation: offHoverBounce 0.5s var(--effect-timing);
+  will-change: scale;
+}
+
+/* Dark Mode */
+@media (prefers-color-scheme: dark) {
+  .glass-icon {
+    --bg-color:
+      linear-gradient(135deg,
+        rgba(255, 255, 255, 0.25) 0%,
+        rgba(255, 255, 255, 0.15) 50%,
+        rgba(255, 255, 255, 0.05) 100%);
+    --highlight: rgba(255, 255, 255, 0.35);
+  }
+
+  .glass-content img {
+    filter: invert(100%);
+  }
+}
