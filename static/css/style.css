@@ -102,11 +102,18 @@ body {
   top: 0;
   left: 0;
   width: 100vw;
-  height: 100vh;
+  height: 100dvh;
+  min-height: 100vh;
   object-fit: cover;
   object-position: center;
   z-index: 1;
   background-color: #000;
+}
+
+@supports not (height: 100dvh) {
+  #bg-video {
+    height: 100vh;
+  }
 }
 
 /* Layout */

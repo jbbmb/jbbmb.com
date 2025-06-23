@@ -40,7 +40,7 @@ const getTimeBasedIntro = () => {
   "Thanks You for visiting."
 ], redirects = {
   "?cvitae_pdf": {
-    url: "https://github.com/jbbmb/jbbmb.github.io/raw/main/static/pdf/Curriculum%20Vitae%20of%20João%20de%20Macedo%20Borges.pdf",
+    url: "https://github.com/jbbmb/jbbmb.com/raw/main/static/pdf/Curriculum%20Vitae%20of%20João%20de%20Macedo%20Borges.pdf",
     message: "Curriculum Vitæ downloaded successfully.",
     category: "cvitae_pdf"
   },
