@@ -1,6 +1,5 @@
-<p align="center">
-  <img src="static/assets/timeline.png"/>
-</p>
+<script>parent.document.querySelectorAll('.anchor').forEach(el => el.remove());</script>
+<p align="center"><img src="static/assets/timeline.png"/></p>
 
 ## 🔌 Service Status
 You can always check if everything is up and running at [status.jbbmb.com](http://status.jbbmb.com).
@@ -9,7 +8,7 @@ You can always check if everything is up and running at [status.jbbmb.com](http:
 This project got a lot of love and support from [Mário Matias](https://www.linkedin.com/in/jmamatias), [Francisco Araújo](https://www.linkedin.com/in/franciscoeparaujo), [Miguel Martins](https://instagram.com/miguelmartinsmm), [Mariana Preto](https://www.linkedin.com/in/mariana-preto) and [Pedro Mouta](https://www.linkedin.com/in/pedro-mouta-52080124a).
 
 ## 👀 Privacy Policy
-jbbmb.com does not use cookies or track You through browser storage mechanisms.
+jbbmb.com itself does not use cookies or track You through browser storage mechanisms.
 
 This website uses Google Analytics 4 to collect anonymized usage statistics. The information collected may include standard data such as your device type, browser version, screen resolution, approximate geographic location, and time spent on the website. This data is transmitted to and stored by Google on servers located outside the European Union.
 

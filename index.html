@@ -4,8 +4,7 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy"
-    content="base-uri frame-ancestors 'self' www.googletagmanager.com www.google-analytics.com">
+  <meta http-equiv="Content-Security-Policy" content="base-uri 'self'; frame-ancestors 'none'">
   <meta name="viewport"
     content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, shrink-to-fit=no, viewport-fit=cover">
   <title>João de Macedo Borges</title>
@@ -27,7 +26,7 @@
   <meta name="theme-color" content="#000000">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" sizes="192x192" href="static/favicons/favicon-192.png">
-  <link rel="preload" as="video" href="static/mp4/cover.mp4" type="video/mp4">
+  <link rel="preload" href="static/mp4/cover.mp4" type="video/mp4">
   <link rel="stylesheet" type="text/css" href="static/css/style.css">
   <noscript>
     <link rel="stylesheet" type="text/css" href="static/css/noscript.css" />
@@ -60,15 +59,15 @@
     </svg>
 
     <div class="bottom-section">
-      <a href="https://www.linkedin.com/in/jbbmb" target="_self" id="cvitae" class="glass-icon" tabindex="1"
-        aria-label="Documents his career on LinkedIn.">
+      <a href="https://www.linkedin.com/in/jbbmb" target="_self" data-tag="LinkedIn" id="cvitae" class="glass-icon"
+        tabindex="1" aria-label="Documents his career on LinkedIn.">
         <div class="glass-filter"></div>
         <div class="glass-overlay"></div>
         <div class="glass-specular"></div>
         <div class="glass-content"><img src="static/assets/network.png" loading="lazy"></div>
       </a>
 
-      <a href="https://github.com/jbbmb" target="_self" id="git" class="glass-icon" tabindex="2"
+      <a href="https://github.com/jbbmb" target="_self" data-tag="GitHub" id="git" class="glass-icon" tabindex="2"
         aria-label="Pushes chaotic commits to GitHub.">
         <div class="glass-filter"></div>
         <div class="glass-overlay"></div>
@@ -76,24 +75,24 @@
         <div class="glass-content"><img src="static/assets/hammer.png" loading="lazy"></div>
       </a>
 
-      <a href="https://routinehub.co/user/jbbmb" target="_self" id="shortcuts" class="glass-icon" tabindex="3"
-        aria-label="Shares his Shortcuts on RoutineHub.">
+      <a href="https://routinehub.co/user/jbbmb" target="_self" data-tag="RoutineHub" id="shortcuts" class="glass-icon"
+        tabindex="3" aria-label="Shares his Shortcuts on RoutineHub.">
         <div class="glass-filter"></div>
         <div class="glass-overlay"></div>
         <div class="glass-specular"></div>
         <div class="glass-content"><img src="static/assets/shortcuts.png" loading="lazy"></div>
       </a>
 
-      <a href="https://www.youtube.com/@jbbmb" target="_self" id="videos" class="glass-icon" tabindex="4"
-        aria-label="Rarely uploads to his YouTube channel.">
+      <a href="https://www.youtube.com/@jbbmb" target="_self" data-tag="YouTube" id="videos" class="glass-icon"
+        tabindex="4" aria-label="Rarely uploads to his YouTube channel.">
         <div class="glass-filter"></div>
         <div class="glass-overlay"></div>
         <div class="glass-specular"></div>
         <div class="glass-content"><img src="static/assets/film.stack.png" loading="lazy"></div>
       </a>
 
-      <a href="https://bsky.app/profile/jbbmb.com" target="_self" id="bluesky" class="glass-icon" tabindex="5"
-        aria-label="Posts random thoughts on Bluesky.">
+      <a href="https://bsky.app/profile/jbbmb.com" target="_self" data-tag="Bluesky" id="bluesky" class="glass-icon"
+        tabindex="5" aria-label="Posts random thoughts on Bluesky.">
         <div class="glass-filter"></div>
         <div class="glass-overlay"></div>
         <div class="glass-specular"></div>
@@ -108,7 +107,7 @@
         <div class="glass-content"><img src="static/assets/envelope.png" loading="lazy"></div>
       </a>
 
-      <a href="https://revolut.me/jbbmb" target="_self" id="revolut" class="glass-icon" tabindex="7"
+      <a href="https://revolut.me/jbbmb" target="_self" data-tag="Revolut" id="revolut" class="glass-icon" tabindex="7"
         aria-label="Accepts donations for coffee on Revolut.">
         <div class="glass-filter"></div>
         <div class="glass-overlay"></div>
@@ -116,7 +115,7 @@
         <div class="glass-content"><img src="static/assets/eurosign.png" loading="lazy"></div>
       </a>
 
-      <a href="https://github.com/jbbmb/jbbmb.com/blob/main/README.md" target="_self" id="copyright"
+      <a href="https://github.com/jbbmb/jbbmb.com/blob/main/README.md" target="_self" data-tag="GitHub" id="copyright"
         class="glass-icon" tabindex="8" aria-label="Has built this tiny corner of the Web.">
         <div class="glass-filter"></div>
         <div class="glass-overlay"></div>

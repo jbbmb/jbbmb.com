@@ -21,12 +21,12 @@ const getTimeBasedIntro = () => {
   "Writes code in his free time.",
   "Obsesses over privacy and user experience.",
   "Nags companies to delete unused accounts.",
-  "Believes AI is nothing to be scared of.",
-  "Wants to be remembered for something meaningful.",
+  "Believes ChatGPT is nothing to be scared of.",
+  "Wants to leave a meaningful legacy.",
   "Stays hungry and foolish.",
   "Can't settle on an iPhone wallpaper.",
   "Hates notifications and texting.",
-  "Raised in a big family, but skipped the religion.",
+  "Raised in a big family with no religion.",
   "Rocks to blues, pop and electronic beats.",
   "Orders a gin and tonic instead of beer.",
   "Prefers cats over dogs all day, any day.",
@@ -41,12 +41,12 @@ const getTimeBasedIntro = () => {
 ], redirects = {
   "?cvitae_pdf": {
     url: "https://github.com/jbbmb/jbbmb.com/raw/main/static/pdf/Curriculum%20Vitae%20of%20João%20de%20Macedo%20Borges.pdf",
-    message: "Curriculum Vitæ downloaded successfully.",
+    message: "Curriculum Vitæ download started...",
     category: "cvitae_pdf"
   },
   "?system_status": {
     url: "http://stats.uptimerobot.com/OXmELf5EPJ",
-    message: "Taking You there...",
+    message: "Opening UptimeRobot...",
     category: "system_status"
   }
 }, body = document.querySelector("body"),
@@ -57,7 +57,8 @@ const getTimeBasedIntro = () => {
   supportsClipboard = navigator.clipboard && typeof navigator.clipboard.writeText === "function",
   prefersTouch = window.matchMedia("(hover: none)").matches;
 let flagActionNotification = false,
-  lastMove = 0;
+  flagTouchingTarget = false,
+  lastMouseMove = 0;
 
 /** Activates Analytics and TextScramble effect */
 window.addEventListener("load", () => {
@@ -87,21 +88,21 @@ window.addEventListener('pageshow', () => {
 /** Adds interactivity to all Liquid Glass elements */
 document.addEventListener("DOMContentLoaded", function () {
 
-  body.addEventListener("mousemove", function (e) {
+  body.addEventListener("mousemove", function (event) {
     const now = performance.now();
-    if (now - lastMove < 8.33) return; // Cap at 120 FPS
-    lastMove = now;
+    if (now - lastMouseMove < 8.33) return; // Cap at 120 FPS
+    lastMouseMove = now;
     glassIcons.forEach(icon => {
       const rect = icon.getBoundingClientRect();
       const cx = rect.left + rect.width / 2;
       const cy = rect.top + rect.height / 2;
-      const dx = e.clientX - cx;
-      const dy = e.clientY - cy;
+      const dx = event.clientX - cx;
+      const dy = event.clientY - cy;
       const distance = Math.sqrt(dx * dx + dy * dy);
       const specular = icon.querySelector(".glass-specular");
       if (!isDeviceMobile() && distance < 100) {
-        const localX = e.clientX - rect.left;
-        const localY = e.clientY - rect.top;
+        const localX = event.clientX - rect.left;
+        const localY = event.clientY - rect.top;
         specular.style.background = `
           radial-gradient(
             100px circle at ${localX}px ${localY}px,
@@ -125,22 +126,47 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     icon.addEventListener("mouseout", () => {
-      hideDescriptionNotification(icon, description, greeting, action)
+      hideDescriptionNotification(icon, description, greeting, action);
+      document.activeElement.blur();
     });
 
     icon.addEventListener("click", () => {
       gtag("event", "click", { event_category: icon.id });
       if ("vibrate" in navigator) {
-        navigator.vibrate(15); // Light haptic feedback
+        navigator.vibrate([10, 30, 10]); // Layered haptic feedback
+      }
+      if (icon.id != "mail") {
+        showActionNotication(("Opening " + icon.getAttribute("data-tag") + "..."), 1500);
       }
       document.activeElement.blur();
-      if (icon.id != "mail") {
-        showActionNotication("Taking You there...", 1500);
-      }
     });
 
     icon.addEventListener("blur", () => {
-      hideDescriptionNotification(icon, description, greeting, action)
+      hideDescriptionNotification(icon, description, greeting, action);
+    });
+
+    icon.addEventListener('touchstart', () => {
+      flagTouchingTarget = true;
+      showDescriptionNotification(icon, description, greeting, action);
+    });
+
+    icon.addEventListener('touchmove', (event) => {
+      const touch = event.touches[0];
+      const target = document.elementFromPoint(touch.clientX, touch.clientY);
+      if (!icon.contains(target)) {
+        flagTouchingTarget = false; // Cancel if finger moved outside the button
+        hideDescriptionNotification(icon, description, greeting, action);
+        document.activeElement.blur();
+      }
+    });
+
+    icon.addEventListener('touchend', () => {
+      if (flagTouchingTarget) {
+        icon.click();
+      }
+      flagTouchingTarget = false;
+      hideDescriptionNotification(icon, description, greeting, action);
+      document.activeElement.blur();
     });
   });
 });
@@ -178,7 +204,7 @@ function handleExternalRedirect(route) {
     showActionNotication(config.message, 3500);
     window.open(config.url, "_self");
   } else {
-    showActionNotication("The requested page was not found.", 3500);
+    showActionNotication("The requested page was not found!", 3500);
   }
 }
 
