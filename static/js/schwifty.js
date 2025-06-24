@@ -162,7 +162,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     icon.addEventListener('touchend', () => {
-      if (flagTouchingTarget) {
+      if (flagTouchingTarget && icon.id != "mail") {
         icon.click();
       } else {
         flagTouchingTarget = false;
