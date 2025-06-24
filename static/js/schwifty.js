@@ -17,16 +17,17 @@ const getTimeBasedIntro = () => {
   getTimeBasedIntro(),
   "Currently lives in the city of Porto.",
   "Born in northern Portugal, Earth.",
+  "Raised in a big family with no religion.",
   "Studies software and cybersecurity.",
   "Writes code in his free time.",
+  "Automates tasks no one asked to be automated.",
   "Obsesses over privacy and user experience.",
   "Nags companies to delete unused accounts.",
   "Believes ChatGPT is nothing to be scared of.",
   "Wants to leave a meaningful legacy.",
   "Stays hungry and foolish.",
-  "Can't settle on an iPhone wallpaper.",
+  "Never settles on an iPhone wallpaper.",
   "Hates notifications and texting.",
-  "Raised in a big family with no religion.",
   "Rocks to blues, pop and electronic beats.",
   "Orders a gin and tonic instead of beer.",
   "Prefers cats over dogs all day, any day.",
@@ -37,6 +38,7 @@ const getTimeBasedIntro = () => {
   "Takes care of plants that end up dying.",
   "Believes in climate change and vaccines.",
   "Votes every time there is an election.",
+  "Overthinks a lot, including this sentence.",
   "Thanks You for visiting."
 ], redirects = {
   "?cvitae_pdf": {
