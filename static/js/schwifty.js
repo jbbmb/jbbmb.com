@@ -157,18 +157,17 @@ document.addEventListener("DOMContentLoaded", function () {
       const target = document.elementFromPoint(touch.clientX, touch.clientY);
       if (!icon.contains(target)) {
         flagTouchingTarget = false; // Cancel if finger moved outside the button
-        hideDescriptionNotification(icon, description, greeting, action);
-        document.activeElement.blur();
+        icon.dispatchEvent(new Event("mouseout", { bubbles: true }));
       }
     });
 
     icon.addEventListener('touchend', () => {
       if (flagTouchingTarget) {
         icon.click();
+      } else {
+        flagTouchingTarget = false;
+        icon.dispatchEvent(new Event("mouseout", { bubbles: true }));
       }
-      flagTouchingTarget = false;
-      hideDescriptionNotification(icon, description, greeting, action);
-      document.activeElement.blur();
     });
   });
 });

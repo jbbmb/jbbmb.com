@@ -209,32 +209,49 @@ body {
 @media (hover : hover) {
 
   .glass-icon:hover,
-  .glass-icon:focus {
+  .glass-icon:hover .glass-content img,
+  .glass-icon:focus,
+  .glass-icon:focus .glass-content img {
     animation: onHoverBounce 0.5s var(--effect-timing);
     transform: scale(1.2);
     will-change: scale;
-
-    .glass-content img {
-      animation: onHoverBounce 0.5s var(--effect-timing);
-      transform: scale(1.2);
-      will-change: scale;
-    }
-  }
-}
-
-.glass-icon:active {
-  animation: clickBounce 0.5s var(--effect-timing);
-  transform: scale(1.4);
-  will-change: scale;
-
-  .glass-filter {
-    filter: brightness(2.30);
   }
 
-  .glass-content img {
+  .glass-icon:active {
+    animation: clickBounce 0.5s var(--effect-timing);
+    transform: scale(1.4);
+    will-change: scale;
+  }
+
+  .glass-icon:active .glass-filter {
+    filter: brightness(2.3);
+  }
+
+  .glass-icon:active .glass-content img {
     opacity: 0.5;
     animation: clickBounce 0.5s var(--effect-timing);
     transform: scale(1.4);
+    will-change: scale;
+  }
+}
+
+@media (hover : none) {
+
+  .glass-icon:active {
+    background: radial-gradient(100px circle at 50% 50%, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.2) 30%, rgba(255, 255, 255, 0) 60%);
+    animation: onHoverBounce 0.5s var(--effect-timing);
+    transform: scale(1.2);
+    will-change: scale;
+  }
+
+  .glass-icon:active .glass-filter {
+    filter: brightness(2.3);
+  }
+
+  .glass-icon:active .glass-content img {
+    opacity: 0.5;
+    animation: onHoverBounce 0.5s var(--effect-timing);
+    transform: scale(1.2);
     will-change: scale;
   }
 }
