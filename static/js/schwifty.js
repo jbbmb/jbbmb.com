@@ -62,11 +62,11 @@ let flagActionNotification = false,
 
 /** Activates Analytics and TextScramble effect */
 window.addEventListener("load", () => {
-  console.log("🤔 Inspecting, are we? What are You hoping to find exactly?");
   gtag('js', new Date());
   gtag('config', 'G-FMEDZDBVNJ');
   const fx = new TextScramble(document.querySelector("#greeting"));
   let i = 0;
+  console.log("🤔 Inspecting, are we? What are You hoping to find exactly?");
   const rotate = () => {
     fx.setText(phrases[i]).then(() => setTimeout(rotate, 3500));
     i = (i + 1) % phrases.length;
@@ -136,7 +136,7 @@ document.addEventListener("DOMContentLoaded", function () {
         navigator.vibrate([10, 30, 10]); // Layered haptic feedback
       }
       if (icon.id != "mail") {
-        showActionNotication(("Opening " + icon.getAttribute("data-tag") + "..."), 1500);
+        showActionNotication(("Opening " + icon.getAttribute("alt") + "..."), 1500);
       }
       document.activeElement.blur();
     });
