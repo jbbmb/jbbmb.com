@@ -10,11 +10,11 @@ This project got a lot of love and support from [Mário Matias](https://www.link
 ## 👁️‍🗨️ Privacy Policy
 jbbmb.com itself does not use cookies or track You through browser storage mechanisms.
 
-This website uses Google Analytics 4 to collect anonymized usage statistics. The information collected may include standard data such as your device type, browser version, screen resolution, approximate geographic location, and time spent on the website. This data is transmitted to and stored by Google on servers located outside the European Union.
+This website uses Google Analytics 4 to collect anonymized usage statistics. The information collected may include standard data such as Your device type, browser version, screen resolution, approximate geographic location, and time spent on the website. This data is transmitted to and stored by Google on servers located outside the European Union.
 
 The legal basis for processing this data is João's legitimate interest in understanding traffic patterns and improving user experience. No Personally Identifiable Information is intentionally collected, stored, or shared.
 
-Under the General Data Protection Regulation, You have the right to request access to, or deletion of, any data associated with your session. Although this data is anonymized and not directly linked to individuals, requests will be honored to the fullest extent possible. To initiate such a request, please contact João directly via e-mail.
+Under the General Data Protection Regulation, You have the right to request access to, or deletion of, any data associated with Your session. Although this data is anonymized and not directly linked to individuals, requests will be honored to the fullest extent possible. To initiate such a request, please contact João directly via e-mail.
 
 João reserves the right to update this policy at any time. Continued use of the website constitutes acceptance of any changes. Please review this policy periodically to stay informed.
 
