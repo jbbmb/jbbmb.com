@@ -96,7 +96,19 @@ body {
   z-index: 0;
 }
 
-/* Background Video */
+/* Background */
+#bg-image {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  object-fit: cover;
+  z-index: 1;
+  filter: grayscale(100%) brightness(0.8);
+}
+
 #bg-video {
   position: fixed;
   top: 0;
@@ -113,6 +125,16 @@ body {
 @supports not (height: 100dvh) {
   #bg-video {
     height: 100vh;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #bg-image {
+    display: block;
+  }
+  
+  #bg-video {
+    display: none;
   }
 }
 
