@@ -67,6 +67,16 @@
   }
 }
 
+@keyframes clickBlur {
+  0% {
+    filter: blur(1px);
+  }
+
+  100% {
+    filter: blur(3px);
+  }
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -246,14 +256,15 @@ body {
   }
 
   .glass-icon:active .glass-filter {
-    filter: brightness(2.3);
+    filter: brightness(2.2) contrast(1.8) saturate(1.4);
   }
 
   .glass-icon:active .glass-content img {
-    opacity: 0.5;
     animation: clickBounce 0.5s var(--effect-timing);
     transform: scale(1.4);
-    will-change: scale;
+    animation: clickBlur 0.5s var(--effect-timing);
+    filter: blur(3px);
+    will-change: scale filter;
   }
 }
 
@@ -267,14 +278,15 @@ body {
   }
 
   .glass-icon:active .glass-filter {
-    filter: brightness(2.3);
+    filter: brightness(2.2) contrast(1.8) saturate(1.4);
   }
 
   .glass-icon:active .glass-content img {
-    opacity: 0.5;
     animation: onHoverBounce 0.5s var(--effect-timing);
     transform: scale(1.2);
-    will-change: scale;
+    animation: clickBlur 0.5s var(--effect-timing);
+    filter: blur(3px);
+    will-change: scale filter;
   }
 }
 
