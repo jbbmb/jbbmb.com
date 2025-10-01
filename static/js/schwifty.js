@@ -43,7 +43,7 @@ const getTimeBasedIntro = () => {
 ], redirects = {
   "?cvitae_pdf": {
     url: "#",
-    message: "Curriculum Vitæ not available...",
+    message: "Curriculum Vitæ not available!",
     category: "cvitae_pdf"
   },
   "?system_status": {
