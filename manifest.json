@@ -1,0 +1,40 @@
+{
+	"name": "JBBMB",
+	"short_name": "JBBMB",
+	"start_url": "/",
+	"display": "fullscreen",
+	"background_color": "#000000",
+	"theme_color": "#000000",
+	"icons": [
+		{
+			"src": "static/favicons/favicon-36.png",
+			"sizes": "36x36",
+			"type": "image/png"
+		},
+		{
+			"src": "static/favicons/favicon-48.png",
+			"sizes": "48x48",
+			"type": "image/png"
+		},
+		{
+			"src": "static/favicons/favicon-72.png",
+			"sizes": "72x72",
+			"type": "image/png"
+		},
+		{
+			"src": "static/favicons/favicon-96.png",
+			"sizes": "96x96",
+			"type": "image/png"
+		},
+		{
+			"src": "static/favicons/favicon-144.png",
+			"sizes": "144x144",
+			"type": "image/png"
+		},
+		{
+			"src": "static/favicons/favicon-192.png",
+			"sizes": "192x192",
+			"type": "image/png"
+		}
+	]
+}
