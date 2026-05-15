@@ -23,7 +23,7 @@ const getTimeBasedIntro = () => {
   "Automates tasks no one asked to be automated.",
   "Obsesses over privacy and user experience.",
   "Nags companies to delete unused accounts.",
-  "Believes ChatGPT is nothing to be scared of.",
+  "Believes AI is nothing to be scared of.",
   "Wants to leave a meaningful legacy.",
   "Stays hungry and foolish.",
   "Never settles on an iPhone wallpaper.",
