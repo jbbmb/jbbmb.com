@@ -2,7 +2,8 @@
     --effect-timing: linear;
 }
 
-#background-video {
+#background-video,
+#mail {
     display: none;
 }
 
