@@ -134,6 +134,12 @@ body {
   }
 }
 
+@media (prefers-contrast: more) {
+  #background-video {
+    filter: blur(4px) brightness(0.5);
+  }
+}
+
 /* Layout */
 .page-content {
   position: relative;
