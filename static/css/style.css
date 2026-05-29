@@ -115,7 +115,6 @@ body {
   object-fit: cover;
   object-position: center;
   z-index: 1;
-  filter: blur(0.5px);
 }
 
 @supports not (height: 100dvh) {
@@ -136,7 +135,7 @@ body {
 
 @media (prefers-contrast: more) {
   #background-video {
-    filter: blur(4px) brightness(0.5);
+    filter: blur(5px) brightness(0.5);
   }
 }
 
