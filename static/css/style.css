@@ -172,6 +172,7 @@ body {
   font-size: 1rem;
   animation: offHoverBounce 0.5s var(--effect-timing);
   will-change: transform;
+  text-shadow: 2px 8px 6px rgba(0,0,0,0.2), 0px -5px 35px rgba(255,255,255,0.3);
 }
 
 #description {
@@ -211,6 +212,8 @@ body {
     linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.05) 100%);
   --highlight: rgba(255, 255, 255, 0.35);
   --icon-size: 65px;
+  border: 0.4px solid rgba(0, 0, 0, 0.25);
+  outline-offset: 0px;
   padding: 0.65rem;
   position: relative;
   width: var(--icon-size);
