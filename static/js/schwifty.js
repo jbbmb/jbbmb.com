@@ -34,7 +34,7 @@ const getTimeBasedIntro = () => {
   "Prefers cats over dogs all day, any day.",
   "Speaks three languages fluently.",
   "Spends his money on massages and trips.",
-  "Has set foot in eight countries so far.",
+  "Has set foot in nine countries so far.",
   "Always takes pictures of the sunset.",
   "Takes care of plants that end up dying.",
   "Believes in climate change and vaccines.",
