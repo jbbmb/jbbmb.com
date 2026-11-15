@@ -17,15 +17,11 @@
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  :root {
-    --play-state: running;
-  }
+  :root { --play-state: running; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  :root {
-    --effect-timing: linear;
-  }
+  :root { --effect-timing: linear; }
 }
 
 @font-face {
@@ -37,158 +33,42 @@
 }
 
 /* Registered so the browser can interpolate them in keyframes */
-@property --color-stop {
-  syntax: "<percentage>";
-  initial-value: 0%;
-  inherits: false;
-}
-
-@property --reveal {
-  syntax: "<length>";
-  initial-value: 0px;
-  inherits: false;
-}
-
-@property --grow {
-  syntax: "<number>";
-  initial-value: 1;
-  inherits: false;
-}
+@property --color-stop { syntax: "<percentage>"; initial-value: 0%; inherits: false; }
+@property --reveal     { syntax: "<length>";     initial-value: 0px; inherits: false; }
+@property --grow       { syntax: "<number>";     initial-value: 1;   inherits: false; }
 
 /* ==========================================================================
    Keyframes
    ========================================================================== */
 @keyframes blurIn {
-  0% {
-    opacity: 0;
-    filter: blur(5px);
-  }
-
-  50% {
-    opacity: .5;
-    filter: blur(2.5px);
-  }
-
-  100% {
-    opacity: 1;
-    filter: none;
-  }
-
-  /* none, not blur(0): see .page-content */
+  0%   { opacity: 0;  filter: blur(5px); }
+  50%  { opacity: .5; filter: blur(2.5px); }
+  100% { opacity: 1;  filter: none; }   /* none, not blur(0): see .page-content */
 }
 
 @keyframes offHoverBounce {
-  0% {
-    transform: scale(1.1);
-  }
-
-  50% {
-    transform: scale(.95);
-  }
-
-  100% {
-    transform: scale(1);
-  }
+  0%   { transform: scale(1.1); }
+  50%  { transform: scale(.95); }
+  100% { transform: scale(1); }
 }
 
 @keyframes onHoverBounce {
-  0% {
-    transform: scale(1);
-  }
-
-  50% {
-    transform: scale(1.25);
-  }
-
-  100% {
-    transform: scale(1.2);
-  }
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.25); }
+  100% { transform: scale(1.2); }
 }
 
-@keyframes clickBounce {
-  0% {
-    transform: scale(1.2);
-  }
+@keyframes clickBounce { 0% { transform: scale(1.2); } 100% { transform: scale(1.4); } }
+@keyframes clickBlur   { 0% { filter: blur(1px); }     100% { filter: blur(3px); } }
 
-  100% {
-    transform: scale(1.4);
-  }
-}
-
-@keyframes clickBlur {
-  0% {
-    filter: blur(1px);
-  }
-
-  100% {
-    filter: blur(3px);
-  }
-}
-
-@keyframes colorStops {
-  to {
-    --color-stop: 100%;
-  }
-}
+@keyframes colorStops { to { --color-stop: 100%; } }
 
 /* entrance */
-@keyframes bgReveal {
-  from {
-    --reveal: 0px;
-  }
-
-  to {
-    --reveal: 180vmax;
-  }
-}
-
-@keyframes bgGrow {
-  from {
-    --grow: 0;
-  }
-
-  50% {
-    --grow: 1.2;
-  }
-
-  75% {
-    --grow: .94;
-  }
-
-  to {
-    --grow: 1;
-  }
-}
-
-@keyframes bgScrimIn {
-  from {
-    opacity: 0;
-  }
-}
-
-@keyframes bubblePop {
-  from {
-    opacity: 0;
-    scale: .7;
-  }
-
-  to {
-    opacity: 1;
-    scale: 1;
-  }
-}
-
-@keyframes bubbleShock {
-  from {
-    opacity: .9;
-    transform: scale(.125);
-  }
-
-  to {
-    opacity: 0;
-    transform: scale(1);
-  }
-}
+@keyframes bgReveal   { from { --reveal: 0px; } to { --reveal: 180vmax; } }
+@keyframes bgGrow     { from { --grow: 0; } 50% { --grow: 1.2; } 75% { --grow: .94; } to { --grow: 1; } }
+@keyframes bgScrimIn  { from { opacity: 0; } }
+@keyframes bubblePop  { from { opacity: 0; scale: .7; } to { opacity: 1; scale: 1; } }
+@keyframes bubbleShock { from { opacity: .9; transform: scale(.125); } to { opacity: 0; transform: scale(1); } }
 
 /* ==========================================================================
    Reset
@@ -214,6 +94,11 @@ body {
   background-color: var(--bkg);
 }
 
+@supports (height: 100dvh) {
+  html,
+  body { height: 100dvh; }
+}
+
 /* ==========================================================================
    Background: animated radial gradients seen through a dot grid
    (CodePen "Animated radial gradients" by jp-arts)
@@ -221,12 +106,9 @@ body {
    ========================================================================== */
 body::before {
   content: '';
-  --dot: 2px;
-  /* dot radius */
-  --gap: 60px;
-  /* grid spacing */
-  --grow: 1;
-  /* 0 -> 1 during the entrance */
+  --dot: 2px;                /* dot radius */
+  --gap: 60px;               /* grid spacing */
+  --grow: 1;                 /* 0 -> 1 during the entrance */
   --dot-r: calc(var(--dot) * var(--grow));
   --loc: max(220vw, 220vh);
 
@@ -275,12 +157,21 @@ body::after {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: 2rem;
+  gap: clamp(.25rem, 2vh, 1.5rem);
+  padding:
+    max(1.25rem, env(safe-area-inset-top))
+    max(1.25rem, env(safe-area-inset-right))
+    max(1.25rem, env(safe-area-inset-bottom))
+    max(1.25rem, env(safe-area-inset-left));
   color: #fff;
   text-align: center;
   z-index: 2;
-  /* No fill-mode: once the fade-in ends nothing lingers on this element. A lingering opacity/filter
-     animation makes it a "backdrop root", and the glass would then only see the avatar, not the background. */
+}
+
+/* Signature and tagline fade in. The fade lives here, not on .page-content: an element that is fading
+   (opacity < 1) or filtered becomes a "backdrop root", and everything inside it can only blur what is inside it.
+   With the fade on .page-content, the bubbles' glass had nothing to blur until the animation finished. */
+.top-section {
   animation: blurIn 1s var(--effect-timing) backwards;
 }
 
@@ -324,13 +215,20 @@ body::after {
 /* ==========================================================================
    Bubbles
    ========================================================================== */
+/* A square field that can never be wider than the space it is in. (Before, its width came from the viewport while
+   the page has 2rem of padding, so on narrow screens it overflowed, and `margin: 0 auto` made it overflow only to
+   the right: flex items with auto margins are not centred when they don't fit.) 100% is the width of the content box. */
 .bubbles {
-  --S: min(92vw, 50vh, 520px);
+  --S: min(100%, 50vh, 520px);
   position: relative;
   flex: none;
   width: var(--S);
-  height: var(--S);
-  margin: 0 auto;
+  aspect-ratio: 1 / 1;
+  margin: 0;
+}
+
+@supports (height: 100dvh) {
+  .bubbles { --S: min(100%, 50dvh, 520px); }
 }
 
 .bubble-avatar {
@@ -358,18 +256,17 @@ body::after {
 }
 
 /* JS wraps every bubble in a slot. The slot is moved around the avatar (transform), so the bubble itself is free
-   to run the original hover / press animations on its own `transform`. Size and padding are set by JS. */
+   to run the original hover / press animations on its own `transform`. Size and padding are set by JS.
+   No `will-change: transform` anywhere in here: it pins the layer's raster size, so anything scaled up (hover,
+   press, the "closer" scale) is a stretched, blurry bitmap. Without it the browser re-rasterises at the scale shown. */
 .bubble-slot {
   position: absolute;
   left: 0;
   top: 0;
   z-index: 12;
-  will-change: transform;
 }
 
-.bubble-slot.on {
-  z-index: 20;
-}
+.bubble-slot.on { z-index: 20; }
 
 .bubbles .bubble {
   position: absolute;
@@ -387,15 +284,12 @@ body::after {
   outline: none;
   -webkit-tap-highlight-color: transparent;
   animation: offHoverBounce .5s var(--effect-timing);
-  will-change: transform;
   box-shadow: 0 10px 26px rgba(0, 0, 0, .22), 0 1px 3px rgba(0, 0, 0, .14);
-  transition: box-shadow .3s, opacity .4s;
-  opacity: 0;
+  transition: box-shadow .3s;
+  visibility: hidden; /* not opacity: a fading bubble is a backdrop root and its glass would show nothing */
 }
 
-.bubbles .bubble.in {
-  opacity: 1;
-}
+.bubbles .bubble.in { visibility: visible; }
 
 .bubbles .bubble.on {
   box-shadow: 0 22px 48px rgba(0, 0, 0, .32), 0 2px 8px rgba(0, 0, 0, .16);
@@ -424,16 +318,23 @@ body::after {
 
 .glass-overlay {
   z-index: 4;
-  background: linear-gradient(135deg, rgba(255, 255, 255, .2) 0%, rgba(255, 255, 255, .1) 50%, rgba(255, 255, 255, .04) 100%);
+  background-image: linear-gradient(135deg, rgba(255, 255, 255, .2) 0%, rgba(255, 255, 255, .1) 50%, rgba(255, 255, 255, .04) 100%);
+  background-color: rgba(255, 255, 255, 0);
+  transition: background-color .25s var(--effect-timing);
 }
 
-/* The cursor-following highlight is painted into .glass-specular's background by JS */
+/* Hover (and keyboard focus / first touch): the whole bubble gets lighter. Cheap: it only fades a flat colour
+   on one layer, with no per-mouse-move work. */
+.bubbles .bubble.on .glass-overlay,
+.bubbles .bubble:focus .glass-overlay {
+  background-color: rgba(255, 255, 255, .2);
+}
+
+/* Static rim light */
 .glass-specular {
   z-index: 5;
   pointer-events: none;
-  background: none;
   box-shadow: inset 1px 1px 1px rgba(255, 255, 255, .45), inset -1px -1px 1px rgba(255, 255, 255, .28);
-  transition: background .05s var(--effect-timing);
   -webkit-mask-image: radial-gradient(circle, #000 65%, transparent 80%);
   mask-image: radial-gradient(circle, #000 65%, transparent 80%);
 }
@@ -455,7 +356,6 @@ body::after {
   pointer-events: none;
   filter: none;
   animation: offHoverBounce .5s var(--effect-timing);
-  will-change: transform;
   transition: filter .35s var(--effect-timing);
 }
 
@@ -463,20 +363,17 @@ body::after {
    Hover uses .on and press uses .pressed, both set and cleared by JS from pointer events, instead of
    :hover / :active, which can stick (and leave the icon blurred) after pressing a link and dragging off it. */
 @media (hover: hover) {
-
   .bubbles .bubble.on,
   .bubbles .bubble.on .glass-content img,
   .bubbles .bubble:focus,
   .bubbles .bubble:focus .glass-content img {
     animation: onHoverBounce .5s var(--effect-timing);
     transform: scale(1.2);
-    will-change: transform;
   }
 
   .bubbles .bubble.pressed {
     animation: clickBounce .5s var(--effect-timing);
     transform: scale(1.4);
-    will-change: transform;
   }
 
   .bubbles .bubble.pressed .glass-filter {
@@ -487,7 +384,6 @@ body::after {
     animation: clickBounce .5s var(--effect-timing), clickBlur .5s var(--effect-timing);
     transform: scale(1.4);
     filter: blur(3px);
-    will-change: transform;
   }
 }
 
@@ -496,7 +392,6 @@ body::after {
     background: radial-gradient(100px circle at 50% 50%, rgba(255, 255, 255, .6) 0%, rgba(255, 255, 255, .2) 30%, rgba(255, 255, 255, 0) 60%);
     animation: onHoverBounce .5s var(--effect-timing);
     transform: scale(1.2);
-    will-change: transform;
   }
 
   .bubbles .bubble.pressed .glass-filter {
@@ -507,7 +402,6 @@ body::after {
     animation: onHoverBounce .5s var(--effect-timing), clickBlur .5s var(--effect-timing);
     transform: scale(1.2);
     filter: blur(3px);
-    will-change: transform;
   }
 }
 
@@ -518,8 +412,7 @@ body::after {
    ========================================================================== */
 @media (prefers-reduced-motion: no-preference) {
   body::before {
-    --reveal: 400vmax;
-    /* fully revealed once the animation ends */
+    --reveal: 400vmax;       /* fully revealed once the animation ends */
     -webkit-mask-image: radial-gradient(circle at 50% 50%, #000 calc(var(--reveal) - 16vmax), transparent var(--reveal));
     mask-image: radial-gradient(circle at 50% 50%, #000 calc(var(--reveal) - 16vmax), transparent var(--reveal));
     animation:
@@ -535,9 +428,7 @@ body::after {
     mask-image: none;
   }
 
-  body::after {
-    animation: bgScrimIn 1.4s ease .1s backwards;
-  }
+  body::after { animation: bgScrimIn 1.4s ease .1s backwards; }
 
   /* Drawn at its FINAL size and scaled down to the avatar: Safari rasterises a layer at the size it starts
      with, so scaling a small ring up made its edge jagged. Scaling a big, crisp ring down stays sharp.

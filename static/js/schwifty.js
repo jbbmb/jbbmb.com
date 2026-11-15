@@ -284,7 +284,6 @@ document.addEventListener("DOMContentLoaded", () => {
     return {
       el,
       slot,
-      specular: el.querySelector(".glass-specular"),
       z: +el.dataset.z,                                   // size relative to the avatar
       r: +el.dataset.r,                                   // how far it tucks toward the avatar
       base: (i / all.length) * Math.PI * 2 - Math.PI / 2, // starting angle
@@ -297,9 +296,10 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   let S, AV;
+  let dpr = window.devicePixelRatio || 1;
   let focused = null;
   let fMix = 0, fMixT = 0;
-  let mousePending = false, mouseX = 0, mouseY = 0;
+  let mouseX = 0, mouseY = 0;
   let raisedBy = null;   // "mouse" | "touch" | "key"
   let lastTouch = 0;     // browsers fire compatibility mouse events after a touch; those must be ignored
   let lastHoverCheck = 0;
@@ -429,38 +429,11 @@ document.addEventListener("DOMContentLoaded", () => {
     icon.addEventListener("dragstart", e => e.preventDefault()); // links must not start a native drag
   });
 
-  /* ---- Liquid-glass specular highlight: follows the cursor when it is near a bubble ---- */
-  function updateSpeculars(x, y) {
-    if (isDeviceMobile()) return;
-    for (const b of bubbles) {
-      const rect = b.el.getBoundingClientRect(); // live: bubbles move every frame
-      const cx = rect.left + rect.width / 2;
-      const cy = rect.top + rect.height / 2;
-      if (Math.hypot(x - cx, y - cy) < 100) {
-        const k = b.el.offsetWidth / rect.width;  // undo the scale
-        b.specular.style.background = `
-          radial-gradient(
-            100px circle at ${(x - rect.left) * k}px ${(y - rect.top) * k}px,
-            rgba(255, 255, 255, 0.6) 0%,
-            rgba(255, 255, 255, 0.2) 30%,
-            rgba(255, 255, 255, 0) 60%
-          )`;
-      } else {
-        b.specular.style.background = "none";
-      }
-    }
-  }
-
+  /* Only the cursor position is tracked (for the "still under the cursor?" check below); the cursor-following
+     highlight is gone, hover is shown by a lighter bubble (see .on in the stylesheet). */
   body.addEventListener("mousemove", event => {
     mouseX = event.clientX;
     mouseY = event.clientY;
-    if (!mousePending) {
-      mousePending = true;
-      requestAnimationFrame(() => {
-        updateSpeculars(mouseX, mouseY);
-        mousePending = false;
-      });
-    }
   });
 
   /* ---- Layout ---- */
@@ -470,12 +443,10 @@ document.addEventListener("DOMContentLoaded", () => {
     field.style.setProperty("--av", AV + "px");
     for (const b of bubbles) {
       b.size = AV * b.z;
-      b.slot.style.width = b.slot.style.height = b.size + "px";
-      b.el.style.width = b.el.style.height = b.size + "px";
-      b.el.style.padding = b.size * 0.23 + "px";
+      b.cur = -1; // forces the next frame to write the size
     }
   }
-  addEventListener("resize", layout);
+  addEventListener("resize", () => { dpr = window.devicePixelRatio || 1; layout(); });
   layout();
 
   /* Background rings radiate from the avatar: publish its centre as --ox / --oy */
@@ -532,8 +503,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const x = S / 2 + Math.cos(ang) * rho;
       const y = S / 2 + Math.sin(ang) * rho * 0.96;
-      const sc = ease * (1 + b.f * 0.25) * (1 + w * Math.sin(t * 1.1 + b.ph) * 0.012);
-      b.slot.style.transform = `translate(${x - b.size / 2}px, ${y - b.size / 2}px) scale(${sc})`;
+      /* The entrance spring and the "closer" growth change the bubble's real size (width, height, padding)
+         instead of scaling it with a transform. A transform scales an already-drawn bitmap, which is what made
+         icons and glass look soft; a real size is redrawn sharp every time. The slot only ever translates. */
+      const s = b.size * ease * (1 + b.f * 0.25);
+      if (Math.abs(s - b.cur) > 0.05) {
+        b.cur = s;
+        const px = s + "px";
+        b.slot.style.width = b.slot.style.height = px;
+        b.el.style.width = b.el.style.height = px;
+        b.el.style.padding = s * 0.23 + "px";
+      }
+      const snap = v => Math.round(v * dpr) / dpr; // whole device pixels, never between two
+      b.slot.style.transform = `translate(${snap(x - s / 2)}px, ${snap(y - s / 2)}px)`;
     }
     requestAnimationFrame(frame);
   }
