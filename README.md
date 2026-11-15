@@ -21,9 +21,9 @@ João reserves the right to update this policy at any time. Continued use of the
 ## 📌 Copyright
 
 All rights reserved unless otherwise stated. This website incorporates original work created by João de Macedo Borges and select open-source or public resources used in compliance with their respective licenses:
-* Background video, shot by Rostislav Uzunov and posted on Pexels for free use.
 * Inter Typeface, designed by Rasmus Andersson and used under the MIT License.
-* Text Scramble Animation, inspired by Justin Windle's public CodePen and used non-commercially.
+* Background Animation, adapted from the public CodePen of @jp-arts and used non-commercially.
+* Text Scramble Animation, inspired by the public CodePen of @soulwire and used non-commercially.
 * Liquid Glass Effect, adapted from publicly available code on Snipzy and used non-commercially.
 * SF Compact Iconography, from the Apple Native CoreSVG 326 system and used for non-commercial purposes. All rights belong to Apple Incorporated.
 
@@ -32,3 +32,5 @@ Where applicable, code snippets and components may fall under Creative Commons A
 All other content, source code, design, and assets not explicitly attributed are © João de Macedo Borges and may not be copied, reproduced, modified, or redistributed without prior permission.
 
 This website is provided "as is" without any warranties. No liability is accepted for any loss or damages arising from its use.
+
+Built with help from Claude (Anthropic).
