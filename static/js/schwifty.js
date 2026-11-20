@@ -261,6 +261,323 @@ function gtag() {
 }
 
 /* ==========================================================================
+   One animation loop for everything that moves (a single requestAnimationFrame)
+   ========================================================================== */
+const frameTasks = [];
+const onFrame = fn => frameTasks.push(fn);
+
+function startLoop() {
+  const t0 = performance.now();
+  let last = t0;
+  const tick = now => {
+    requestAnimationFrame(tick);
+    const dt = Math.min(0.05, (now - last) / 1000);
+    last = now;
+    const t = (now - t0) / 1000; // seconds since start
+    for (const fn of frameTasks) fn(t, dt, now);
+  };
+  requestAnimationFrame(tick);
+}
+
+const clamp01 = v => Math.min(1, Math.max(0, v));
+
+/** CSS cubic-bezier() easing, so the entrance keeps the curves it had as CSS animations */
+function cubicBezier(x1, y1, x2, y2) {
+  const cx = 3 * x1, bx = 3 * (x2 - x1) - cx, ax = 1 - cx - bx;
+  const cy = 3 * y1, by = 3 * (y2 - y1) - cy, ay = 1 - cy - by;
+  const sx = s => ((ax * s + bx) * s + cx) * s;
+  const sy = s => ((ay * s + by) * s + cy) * s;
+  const dx = s => (3 * ax * s + 2 * bx) * s + cx;
+  return x => {
+    if (x <= 0) return 0;
+    if (x >= 1) return 1;
+    let s = x;
+    for (let i = 0; i < 8; i++) {
+      const e = sx(s) - x;
+      if (Math.abs(e) < 1e-5) break;
+      const d = dx(s);
+      if (Math.abs(d) < 1e-6) break;
+      s -= e / d;
+    }
+    return sy(s);
+  };
+}
+
+/* ==========================================================================
+   Background (WebGL)
+   Rings radiating from the avatar, seen through a rotated dot grid, plus the
+   and the vignette, all computed per pixel in one tiny shader.
+   Replaces a huge animated CSS gradient that was repainted every frame.
+   Returns null (and leaves the plain --bkg page) when WebGL is unavailable.
+   ========================================================================== */
+function createBackground({ reduce, getOrigin }) {
+  const VERT = `
+    attribute vec2 aPos;
+    void main() { gl_Position = vec4(aPos, 0.0, 1.0); }`;
+
+  const FRAG = `
+    #ifdef GL_FRAGMENT_PRECISION_HIGH
+    precision highp float;
+    #else
+    precision mediump float;
+    #endif
+    uniform vec2  uRes;      // canvas size, device px
+    uniform float uDpr;      // device px per CSS px
+    uniform vec2  uView;     // viewport size, CSS px
+    uniform vec2  uOrigin;   // avatar centre, CSS px
+    uniform float uCs;       // ring phase 0..1
+    uniform float uGrow;     // dot size 0..1 (springs past 1 on entrance)
+    uniform float uReveal;   // radius revealed so far, CSS px
+    uniform float uFeather;  // soft edge of the reveal, CSS px
+    uniform float uScrim;    // vignette opacity 0..1
+    uniform float uL;        // ring ray length, CSS px
+    uniform vec3  uBkg;
+    uniform vec3  uC2;
+    uniform vec3  uC3;
+
+    float hash(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
+    vec4 pm(vec3 rgb, float a) { return vec4(rgb * a, a); }
+
+    void main() {
+      vec2 p = vec2(gl_FragCoord.x, uRes.y - gl_FragCoord.y) / uDpr; // CSS px, origin top-left
+      vec2 d = p - uOrigin;
+      float r = length(d);
+      float aa = 1.0 / uDpr;
+
+      // dots: 60px grid rotated 45deg, centred on the avatar, antialiased
+      vec2 q = vec2(d.x + d.y, d.y - d.x) * 0.70710678;
+      vec2 f = (fract(q / 60.0 + 0.5) - 0.5) * 60.0;
+      float dotR = 2.0 * uGrow;
+      float cov = (1.0 - smoothstep(dotR - 0.5 * aa, dotR + 0.5 * aa, length(f))) * smoothstep(0.0, aa, dotR);
+
+      // rings: transparent -> c2 -> c3 -> c2 -> transparent, repeating every half ray length
+      float t = mod(r / uL - uCs, 0.5);
+      float ra = 1.0;
+      vec3 rc = uC2;
+      if (t < 0.15)      { ra = t / 0.15; }
+      else if (t < 0.25) { rc = mix(uC2, uC3, (t - 0.15) / 0.10); }
+      else if (t < 0.30) { rc = mix(uC3, uC2, (t - 0.25) / 0.05); }
+      else               { ra = 1.0 - (t - 0.30) / 0.20; }
+      vec3 ring = mix(uBkg, rc, ra);
+
+      // rings show only inside the dots, revealed outward from the avatar
+      float reveal = clamp((uReveal - r) / uFeather, 0.0, 1.0);
+      vec3 col = mix(uBkg, ring, cov * reveal);
+
+      // vignette: ellipse around the avatar, plus a darker lower half behind the signature
+      float e = length(d / vec2(0.8 * uView.x, 0.65 * uView.y));
+      vec4 s1 = pm(vec3(10.0, 10.0, 12.0) / 255.0, 0.38);
+      vec4 s2 = pm(vec3(6.0, 6.0, 8.0) / 255.0, 0.82);
+      vec4 rs = e < 0.58 ? mix(vec4(0.0), s1, e / 0.58) : mix(s1, s2, clamp((e - 0.58) / 0.42, 0.0, 1.0));
+      float y = p.y / uView.y;
+      vec4 l1 = pm(vec3(20.0, 20.0, 22.0) / 255.0, 0.55);
+      vec4 l2 = pm(vec3(20.0, 20.0, 22.0) / 255.0, 0.82);
+      vec4 ls = y < 0.38 ? vec4(0.0) : (y < 0.68 ? mix(vec4(0.0), l1, (y - 0.38) / 0.30) : mix(l1, l2, clamp((y - 0.68) / 0.32, 0.0, 1.0)));
+      vec4 sc = (rs + ls * (1.0 - rs.a)) * uScrim;
+      col = sc.rgb + col * (1.0 - sc.a);
+
+      col += (hash(gl_FragCoord.xy) - 0.5) / 255.0; // dither: no banding in the dark gradients
+      gl_FragColor = vec4(col, 1.0);
+    }`;
+
+  /* Colours come from the stylesheet so there is one source of truth */
+  const css = getComputedStyle(document.documentElement);
+  const hex = (name, fallback) => {
+    const m = /^#?([0-9a-f]{6})$/i.exec(css.getPropertyValue(name).trim());
+    const n = parseInt(m ? m[1] : fallback, 16);
+    return [(n >> 16 & 255) / 255, (n >> 8 & 255) / 255, (n & 255) / 255];
+  };
+  const bkg = hex("--bkg", "1C1C1E");
+  const accent = hex("--accent-color", "fc9e0e");
+  const c2 = bkg.map((v, i) => v + (accent[i] - v) * 0.34); // color-mix(accent 34%, bkg)
+
+  const canvas = document.createElement("canvas");
+  canvas.id = "bg";
+  canvas.setAttribute("aria-hidden", "true");
+  document.body.prepend(canvas);
+
+  let gl, prog, U;
+  let scale = Math.min(window.devicePixelRatio || 1, 2); // render resolution; lowered automatically if the device struggles
+  let dirty = true;
+  let lastDraw = 0;
+
+  const bezReveal = cubicBezier(0.22, 0.7, 0.2, 1);
+  const bezScrim = cubicBezier(0.25, 0.1, 0.25, 1);
+
+  function compile(type, src) {
+    const s = gl.createShader(type);
+    gl.shaderSource(s, src);
+    gl.compileShader(s);
+    return gl.getShaderParameter(s, gl.COMPILE_STATUS) ? s : null;
+  }
+
+  function init() {
+    gl = canvas.getContext("webgl", {
+      alpha: false, antialias: false, depth: false, stencil: false,
+      powerPreference: "low-power" // integrated GPU is plenty, and spares laptop batteries
+    });
+    if (!gl) return false;
+    const vs = compile(gl.VERTEX_SHADER, VERT);
+    const fs = compile(gl.FRAGMENT_SHADER, FRAG);
+    if (!vs || !fs) return false;
+    prog = gl.createProgram();
+    gl.attachShader(prog, vs);
+    gl.attachShader(prog, fs);
+    gl.linkProgram(prog);
+    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) return false;
+    gl.useProgram(prog);
+
+    const buf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW); // one big triangle
+    const loc = gl.getAttribLocation(prog, "aPos");
+    gl.enableVertexAttribArray(loc);
+    gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+
+    U = {};
+    for (const n of ["uRes", "uDpr", "uView", "uOrigin", "uCs", "uGrow", "uReveal", "uFeather", "uScrim", "uL", "uBkg", "uC2", "uC3"]) {
+      U[n] = gl.getUniformLocation(prog, n);
+    }
+    gl.uniform3fv(U.uBkg, bkg);
+    gl.uniform3fv(U.uC2, c2);
+    gl.uniform3fv(U.uC3, accent);
+    resize();
+    return true;
+  }
+
+  function resize() {
+    const w = canvas.clientWidth, h = canvas.clientHeight;
+    if (!w || !h) return;
+    canvas.width = Math.round(w * scale);
+    canvas.height = Math.round(h * scale);
+    gl.viewport(0, 0, canvas.width, canvas.height);
+    dirty = true;
+  }
+
+  function draw(t) {
+    const w = canvas.clientWidth, h = canvas.clientHeight;
+    if (!w || !h) return;
+    const vmax = Math.max(w, h) / 100;
+    const [ox, oy] = getOrigin();
+
+    let cs = 0, grow = 1, reveal = 1e5, scrim = 1;
+    if (!reduce) {
+      cs = (t / 10) % 1;                                              // one ring period every 5s
+      const tg = t - 0.2;                                             // dots spring up
+      grow = tg <= 0 ? 0 : tg > 2 ? 1 : 1 - Math.exp(-5.5 * tg) * Math.cos(11 * tg);
+      const tr = clamp01((t - 0.1) / 2);                              // reveal expands from the avatar
+      reveal = tr >= 1 ? 1e5 : bezReveal(tr) * 180 * vmax;
+      scrim = bezScrim(clamp01((t - 0.1) / 1.4));                     // vignette fades in
+    }
+
+    gl.uniform2f(U.uRes, canvas.width, canvas.height);
+    gl.uniform1f(U.uDpr, canvas.width / w);
+    gl.uniform2f(U.uView, w, h);
+    gl.uniform2f(U.uOrigin, ox, oy);
+    gl.uniform1f(U.uCs, cs);
+    gl.uniform1f(U.uGrow, grow);
+    gl.uniform1f(U.uReveal, reveal);
+    gl.uniform1f(U.uFeather, 16 * vmax);
+    gl.uniform1f(U.uScrim, scrim);
+    gl.uniform1f(U.uL, 0.70710678 * 2.2 * Math.max(w, h));
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+  }
+
+  if (!init()) {
+    canvas.remove();
+    return null;
+  }
+
+  canvas.addEventListener("webglcontextlost", e => e.preventDefault());
+  canvas.addEventListener("webglcontextrestored", () => { if (init()) dirty = true; });
+  new ResizeObserver(() => { if (gl && !gl.isContextLost()) resize(); }).observe(canvas);
+  draw(0); // paint straight away so there is no black flash before the first frame
+
+  /* Quality guard: if the entrance runs below ~40 fps, drop the render resolution one step (down to 1x) */
+  let samples = 0, slow = 0, lastNow = 0;
+  function guard(t, now) {
+    if (t > 6) return;
+    if (lastNow) {
+      samples++;
+      if (now - lastNow > 26) slow++;
+      if (samples >= 40) {
+        if (slow > 20 && scale > 1) {
+          scale = Math.max(1, scale - 0.5);
+          resize();
+        }
+        samples = slow = 0;
+      }
+    }
+    lastNow = now;
+  }
+
+  onFrame((t, dt, now) => {
+    if (!gl || gl.isContextLost()) return;
+    if (reduce) {                                  // reduced motion: one static frame, redrawn only when needed
+      if (dirty) { draw(0); dirty = false; }
+      return;
+    }
+    if (t > 3.2 && now - lastDraw < 30) return;   // entrance at full rate, then ~30 fps: the rings are slow
+    guard(t, now);
+    lastDraw = now;
+    dirty = false;
+    draw(t);
+  });
+
+  return { redraw: () => { dirty = true; } };
+}
+
+/* ==========================================================================
+   Intro: the signature block drops out of the avatar
+   The signature and tagline themselves (no background) start as a soft, blurred speck behind the avatar,
+   fall out of its lower edge stretching with speed, overshoot their place on a spring, and pop to full
+   size while the blur resolves. Skipped under reduced motion. Leaves no inline styles behind when done.
+   ========================================================================== */
+function createIntro({ el, getGeometry, at }) {
+  const BORN = at;                      // s: the same moment the bubbles and avatar enter
+  const FALL = { a: 4.2, w: 8.5 };      // spring for the fall: ~21% overshoot, lands after ~0.24s
+  const POP = { at: 0.05, a: 7, w: 11 }; // growth to full size, ~13% overshoot
+  const START_SCALE = 0.1;
+  const START_BLUR = 10;                // px
+  const END = 1.7;                      // s after BORN: every spring has settled to well under a pixel
+
+  /* Underdamped spring from 1 to 0 (starting at rest), and its derivative */
+  const spring = (a, w, s) => Math.exp(-a * s) * (Math.cos(w * s) + (a / w) * Math.sin(w * s));
+  const dspring = (a, w, s) => -Math.exp(-a * s) * ((a * a + w * w) / w) * Math.sin(w * s);
+  const smooth = x => { x = clamp01(x); return x * x * (3 - 2 * x); };
+
+  el.style.animation = "none";  // cancel the CSS fallback fade: this takes over
+  el.style.opacity = "0";
+  let done = false;
+
+  onFrame(t => {
+    if (done) return;
+    const tau = t - BORN;
+    if (tau < 0) return;
+    if (tau > END) {
+      done = true;
+      el.style.opacity = el.style.filter = el.style.transform = ""; // keep animation:none, or the CSS fade would replay
+      return;
+    }
+
+    const g = getGeometry(); // avatar centre and the block's natural centre, in px
+    const E = spring(FALL.a, FALL.w, tau);
+    const dx = (g.ox - g.tx) * E;
+    const dy = (g.oy - g.ty) * E;
+
+    /* Stretch along the fall in proportion to speed; narrower as it gets longer */
+    const sq = Math.sqrt(1 + Math.min(0.85, 0.15 * Math.abs(dspring(FALL.a, FALL.w, tau))));
+    const P = 1 - spring(POP.a, POP.w, Math.max(0, tau - POP.at));
+    const s = START_SCALE + (1 - START_SCALE) * P;
+
+    const blur = START_BLUR * (1 - smooth((tau - 0.1) / 0.7));
+    el.style.opacity = smooth(tau / 0.3);
+    el.style.filter = blur > 0.05 ? `blur(${blur.toFixed(2)}px)` : "none";
+    el.style.transform = `translate3d(${dx}px, ${dy}px, 0) scale(${s / sq}, ${s * sq})`;
+  });
+}
+
+/* ==========================================================================
    Bubbles (the former .glass-icon tiles)
    Orbit, entrance and "closer to the user" motion, plus the original interaction logic.
    ========================================================================== */
@@ -269,13 +586,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const avatar = document.getElementById("bubble-avatar");
   if (!field || !avatar) return;
 
-  const root = document.documentElement;
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const ENTER_DELAY = 0.25; // seconds; every bubble enters together
   let flagTouchingTarget = false;
 
-  /* Each bubble gets a wrapper ("slot"): the slot carries the orbit position and scale, the bubble inside keeps
-     its own `transform` for the hover / press animations, so the two never fight over the same property. */
+  /* Each bubble gets a wrapper ("slot"): the slot carries the orbit position, the bubble inside keeps its own
+     `transform` for the hover / press animations, so the two never fight over the same property. */
   const bubbles = [...field.querySelectorAll(".bubble")].map((el, i, all) => {
     const slot = document.createElement("div");
     slot.className = "bubble-slot";
@@ -289,13 +605,16 @@ document.addEventListener("DOMContentLoaded", () => {
       base: (i / all.length) * Math.PI * 2 - Math.PI / 2, // starting angle
       ph: Math.random() * 6.28,
       ph2: Math.random() * 6.28,
-      f: 0,   // current "closer" amount (0..1)
-      fT: 0,  // target "closer" amount
-      size: 0
+      f: 0,    // current "closer" amount (0..1)
+      fT: 0,   // target "closer" amount
+      size: 0, // base size, px
+      cur: -1, // size last written to the DOM
+      tx: NaN, // translate last written to the DOM
+      ty: NaN
     };
   });
 
-  let S, AV;
+  let S = 0, AV = 0;
   let dpr = window.devicePixelRatio || 1;
   let focused = null;
   let fMix = 0, fMixT = 0;
@@ -342,12 +661,13 @@ document.addEventListener("DOMContentLoaded", () => {
   addEventListener("dragend", releasePress, true);
   addEventListener("blur", releasePress);
 
+  /* Clears everything: page hidden, restored from the back/forward cache, or the cursor left the window */
   resetBubbles = () => {
     releasePress();
     lower();
     hideDescriptionNotification(null, description, greeting, action);
   };
-  document.documentElement.addEventListener("mouseleave", () => resetBubbles()); // cursor left the window
+  document.documentElement.addEventListener("mouseleave", () => resetBubbles());
 
   /* When an action message ends and a bubble is still held, the tagline returns to that bubble's description */
   afterActionNotification = () => {
@@ -429,15 +749,19 @@ document.addEventListener("DOMContentLoaded", () => {
     icon.addEventListener("dragstart", e => e.preventDefault()); // links must not start a native drag
   });
 
-  /* Only the cursor position is tracked (for the "still under the cursor?" check below); the cursor-following
-     highlight is gone, hover is shown by a lighter bubble (see .on in the stylesheet). */
+  /* Only the cursor position is tracked, for the "still under the cursor?" check in the frame loop */
   body.addEventListener("mousemove", event => {
     mouseX = event.clientX;
     mouseY = event.clientY;
-  });
+  }, { passive: true });
 
-  /* ---- Layout ---- */
-  function layout() {
+  /* ---- Layout, and the avatar's centre (the background radiates from it) ----
+     Measured only when something actually resizes, never per frame. */
+  let ox = 0, oy = 0;
+  const topSection = document.querySelector(".top-section");
+  const sig = { tx: 0, ty: 0 }; // signature block: its natural (untransformed) centre
+
+  function measure() {
     S = field.offsetWidth;
     AV = S / 2.5;
     field.style.setProperty("--av", AV + "px");
@@ -445,39 +769,38 @@ document.addEventListener("DOMContentLoaded", () => {
       b.size = AV * b.z;
       b.cur = -1; // forces the next frame to write the size
     }
-  }
-  addEventListener("resize", () => { dpr = window.devicePixelRatio || 1; layout(); });
-  layout();
-
-  /* Background rings radiate from the avatar: publish its centre as --ox / --oy */
-  let ox = -1, oy = -1;
-  function syncOrigin() {
     const r = field.getBoundingClientRect();
-    const x = r.left + r.width / 2;
-    const y = r.top + r.height / 2;
-    if (Math.abs(x - ox) > 0.4 || Math.abs(y - oy) > 0.4) {
-      ox = x;
-      oy = y;
-      root.style.setProperty("--ox", x.toFixed(1) + "px");
-      root.style.setProperty("--oy", y.toFixed(1) + "px");
+    ox = r.left + r.width / 2;
+    oy = r.top + r.height / 2;
+    if (topSection) {
+      // offsetLeft/Top are layout values: unlike getBoundingClientRect they ignore the intro's transform.
+      // The offset parent is .page-content, which sits at the viewport origin.
+      sig.tx = topSection.offsetLeft + topSection.offsetWidth / 2;
+      sig.ty = topSection.offsetTop + topSection.offsetHeight / 2;
     }
+    background && background.redraw();
   }
-  syncOrigin();
-  setTimeout(() => root.classList.add("bg-ready"), 2600); // lets the CSS drop the entrance mask
 
-  /* ---- Animation loop ----
-     Orbit position and scale go on the slot wrapper; the bubble's own `transform` is left to the
-     hover / press animations in the stylesheet. */
-  let last = performance.now();
-  const t0 = last;
+  /* The cluster's own size, the signature block (its height changes when the tagline wraps) and the page
+     padding all move the avatar, so those are what we watch. */
+  const background = createBackground({
+    reduce,
+    getOrigin: () => [ox, oy],
+  });
+  const ro = new ResizeObserver(measure);
+  ro.observe(field);
+  ro.observe(document.querySelector(".page-content"));
+  if (topSection) ro.observe(topSection);
+  addEventListener("resize", () => { dpr = window.devicePixelRatio || 1; });
+  measure();
+
+  /* ---- Bubbles frame ----
+     Orbit position goes on the slot (translate only). The entrance spring and the "closer" growth change the
+     bubble's real size instead of scaling it: a transform stretches an already-drawn bitmap (soft icons and
+     glass), a real size is redrawn sharp. Nothing is written to the DOM unless its value changed. */
   let rot = 0;
 
-  function frame(now) {
-    const dt = Math.min(0.05, (now - last) / 1000);
-    const t = (now - t0) / 1000;
-    last = now;
-
-    syncOrigin();
+  onFrame((t, dt, now) => {
     if (raisedBy === "mouse" && now - lastHoverCheck > 120) {
       lastHoverCheck = now;
       const hit = document.elementFromPoint(mouseX, mouseY);
@@ -487,14 +810,17 @@ document.addEventListener("DOMContentLoaded", () => {
         if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
       }
     }
+
     fMix += (fMixT - fMix) * Math.min(1, dt * 6);
     if (!reduce) rot += 0.045 * dt * (1 - fMix * 0.92); // orbit slows while one is held close
-    avatar.style.transform = `translateY(${reduce ? 0 : Math.sin(t * 0.8) * 3}px)`;
+
+    const snap = v => Math.round(v * dpr) / dpr; // whole device pixels, never between two
 
     const w = reduce ? 0 : 1; // wobble on/off
+    const tt = Math.max(0, t - ENTER_DELAY);
+    const ease = reduce ? Math.min(1, tt * 3) : (tt > 2.2 ? 1 : 1 - Math.exp(-5.5 * tt) * Math.cos(11 * tt)); // springy entrance
+
     for (const b of bubbles) {
-      const tt = Math.max(0, t - ENTER_DELAY);
-      const ease = reduce ? Math.min(1, tt * 3) : (tt > 2.2 ? 1 : 1 - Math.exp(-5.5 * tt) * Math.cos(11 * tt)); // springy entrance
       b.f += (b.fT - b.f) * Math.min(1, dt * 9);
 
       const ang = b.base + rot + w * Math.sin(t * 0.35 + b.ph) * 0.14;
@@ -503,9 +829,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const x = S / 2 + Math.cos(ang) * rho;
       const y = S / 2 + Math.sin(ang) * rho * 0.96;
-      /* The entrance spring and the "closer" growth change the bubble's real size (width, height, padding)
-         instead of scaling it with a transform. A transform scales an already-drawn bitmap, which is what made
-         icons and glass look soft; a real size is redrawn sharp every time. The slot only ever translates. */
+
       const s = b.size * ease * (1 + b.f * 0.25);
       if (Math.abs(s - b.cur) > 0.05) {
         b.cur = s;
@@ -514,10 +838,19 @@ document.addEventListener("DOMContentLoaded", () => {
         b.el.style.width = b.el.style.height = px;
         b.el.style.padding = s * 0.23 + "px";
       }
-      const snap = v => Math.round(v * dpr) / dpr; // whole device pixels, never between two
-      b.slot.style.transform = `translate(${snap(x - s / 2)}px, ${snap(y - s / 2)}px)`;
+
+      const tx = snap(x - s / 2), ty = snap(y - s / 2);
+      if (tx !== b.tx || ty !== b.ty) {
+        b.tx = tx;
+        b.ty = ty;
+        b.slot.style.transform = `translate(${tx}px, ${ty}px)`;
+      }
     }
-    requestAnimationFrame(frame);
+  });
+
+  if (!reduce && topSection) {
+    createIntro({ el: topSection, at: ENTER_DELAY, getGeometry: () => ({ ox, oy, tx: sig.tx, ty: sig.ty }) });
   }
-  requestAnimationFrame(frame);
+
+  startLoop();
 });
