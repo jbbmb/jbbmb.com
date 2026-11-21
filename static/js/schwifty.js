@@ -192,7 +192,8 @@ function isDeviceMobile() {
 }
 
 /** Sets e-mail action based on device type (called from the mail bubble's onclick) */
-function handleEmailButton() {
+function handleEmailButton(event) {
+  if (event) event.preventDefault(); // the link is a real mailto: (crawlable, works without JS); this decides what happens instead
   if (isDeviceMobile()) {
     showActionNotification("Opening e-mail app...", 1500);
     window.location.href = "mailto:hello@jbbmb.com";
@@ -366,12 +367,12 @@ function createBackground({ reduce, getOrigin }) {
 
       // vignette: ellipse around the avatar, plus a darker lower half behind the signature
       float e = length(d / vec2(0.8 * uView.x, 0.65 * uView.y));
-      vec4 s1 = pm(vec3(10.0, 10.0, 12.0) / 255.0, 0.38);
-      vec4 s2 = pm(vec3(6.0, 6.0, 8.0) / 255.0, 0.82);
+      vec4 s1 = pm(vec3(10.0, 10.0, 12.0) / 255.0, 0.16);
+      vec4 s2 = pm(vec3(6.0, 6.0, 8.0) / 255.0, 0.42);
       vec4 rs = e < 0.58 ? mix(vec4(0.0), s1, e / 0.58) : mix(s1, s2, clamp((e - 0.58) / 0.42, 0.0, 1.0));
       float y = p.y / uView.y;
-      vec4 l1 = pm(vec3(20.0, 20.0, 22.0) / 255.0, 0.55);
-      vec4 l2 = pm(vec3(20.0, 20.0, 22.0) / 255.0, 0.82);
+      vec4 l1 = pm(vec3(20.0, 20.0, 22.0) / 255.0, 0.3);
+      vec4 l2 = pm(vec3(20.0, 20.0, 22.0) / 255.0, 0.5);
       vec4 ls = y < 0.38 ? vec4(0.0) : (y < 0.68 ? mix(vec4(0.0), l1, (y - 0.38) / 0.30) : mix(l1, l2, clamp((y - 0.68) / 0.32, 0.0, 1.0)));
       vec4 sc = (rs + ls * (1.0 - rs.a)) * uScrim;
       col = sc.rgb + col * (1.0 - sc.a);
@@ -398,6 +399,7 @@ function createBackground({ reduce, getOrigin }) {
 
   let gl, prog, U;
   let scale = Math.min(window.devicePixelRatio || 1, 2); // render resolution; lowered automatically if the device struggles
+  let software = false; // true when WebGL runs on the CPU (no GPU, VM, remote desktop, lab tools)
   let dirty = true;
   let lastDraw = 0;
 
@@ -417,6 +419,9 @@ function createBackground({ reduce, getOrigin }) {
       powerPreference: "low-power" // integrated GPU is plenty, and spares laptop batteries
     });
     if (!gl) return false;
+    const info = gl.getExtension("WEBGL_debug_renderer_info");
+    software = /swiftshader|llvmpipe|softpipe|software|basic render/i.test(info ? String(gl.getParameter(info.UNMASKED_RENDERER_WEBGL)) : "");
+    if (software) scale = Math.min(scale, 0.75); // per-pixel work on a CPU: fewer pixels, the page stays responsive
     const vs = compile(gl.VERTEX_SHADER, VERT);
     const fs = compile(gl.FRAGMENT_SHADER, FRAG);
     if (!vs || !fs) return false;
@@ -452,6 +457,13 @@ function createBackground({ reduce, getOrigin }) {
     canvas.height = Math.round(h * scale);
     gl.viewport(0, 0, canvas.width, canvas.height);
     dirty = true;
+    paint(); // setting the canvas size clears it: repaint in the same task, before the browser shows a frame
+  }
+
+  /* Draws the current state right now (the animation clock is whatever the last frame had) */
+  let curT = 0;
+  function paint() {
+    if (U && gl && !gl.isContextLost()) draw(reduce ? 0 : curT);
   }
 
   function draw(t) {
@@ -501,8 +513,9 @@ function createBackground({ reduce, getOrigin }) {
       samples++;
       if (now - lastNow > 26) slow++;
       if (samples >= 40) {
-        if (slow > 20 && scale > 1) {
-          scale = Math.max(1, scale - 0.5);
+        const floor = software ? 0.5 : 1;
+        if (slow > 20 && scale > floor) {
+          scale = Math.max(floor, scale - 0.25);
           resize();
         }
         samples = slow = 0;
@@ -513,18 +526,19 @@ function createBackground({ reduce, getOrigin }) {
 
   onFrame((t, dt, now) => {
     if (!gl || gl.isContextLost()) return;
+    curT = t;
     if (reduce) {                                  // reduced motion: one static frame, redrawn only when needed
       if (dirty) { draw(0); dirty = false; }
       return;
     }
-    if (t > 3.2 && now - lastDraw < 30) return;   // entrance at full rate, then ~30 fps: the rings are slow
+    if ((software || t > 3.2) && now - lastDraw < (software ? 50 : 30)) return; // entrance at full rate, then ~30 fps (20 on a CPU): the rings are slow
     guard(t, now);
     lastDraw = now;
     dirty = false;
     draw(t);
   });
 
-  return { redraw: () => { dirty = true; } };
+  return { redraw: () => { dirty = true; paint(); } };
 }
 
 /* ==========================================================================
@@ -592,6 +606,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const bubbles = [...field.querySelectorAll(".bubble")].map((el, i, all) => {
     const slot = document.createElement("div");
     slot.className = "bubble-slot";
+    const slotIndex = el.dataset.slot !== undefined ? +el.dataset.slot : i;
+    slot.style.setProperty("--k", slotIndex); // stacking order of overlapping bubbles, as before
     el.parentNode.insertBefore(slot, el);
     slot.appendChild(el);
     return {
@@ -599,7 +615,7 @@ document.addEventListener("DOMContentLoaded", () => {
       slot,
       z: +el.dataset.z,                                   // size relative to the avatar
       r: +el.dataset.r,                                   // how far it tucks toward the avatar
-      base: (i / all.length) * Math.PI * 2 - Math.PI / 2, // starting angle
+      base: (slotIndex / all.length) * Math.PI * 2 - Math.PI / 2, // starting angle (data-slot keeps the orbit layout independent of tab order)
       ph: Math.random() * 6.28,
       ph2: Math.random() * 6.28,
       j: { ox: 0, oy: 0, vx: 0, vy: 0 }, // jelly: how far the bubble is pulled from its orbit spot (px) and how fast it moves
@@ -777,7 +793,7 @@ document.addEventListener("DOMContentLoaded", () => {
         b.py = e.clientY;
         const dx = fl + b.x - e.clientX, dy = ft + b.y - e.clientY;
         const len = Math.hypot(dx, dy) || 1;
-        const kick = Math.min(1, len / (b.cur * 0.5 || 1)) * b.cur * 4; // harder the further from the centre
+        const kick = Math.min(1, len / (b.cur * 0.5 || 1)) * b.cur * 2.2; // harder the further from the centre
         b.j.vx += (dx / len) * kick;
         b.j.vy += (dy / len) * kick;
       });
@@ -884,19 +900,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const w = reduce ? 0 : 1; // wobble on/off
     const tt = Math.max(0, t - ENTER_DELAY);
-    const ease = reduce ? Math.min(1, tt * 3) : (tt > 2.2 ? 1 : 1 - Math.exp(-5.5 * tt) * Math.cos(11 * tt)); // springy entrance
+    const ease = reduce ? 1 : (tt > 2.2 ? 1 : 1 - Math.exp(-5.5 * tt) * Math.cos(11 * tt)); // springy entrance (reduced motion: in place from the start, CSS fades it in)
 
     for (const b of bubbles) {
       b.f += (b.fT - b.f) * Math.min(1, dt * 9);
+      const f = reduce ? 0 : b.f; // reduced motion: a held bubble does not come closer or grow
 
       const ang = b.base + rot + w * Math.sin(t * 0.35 + b.ph) * 0.14;
       let rho = AV / 2 + b.size * (1 - b.r) * 0.5 + AV * 0.07 + b.size * 0.12 * w * Math.sin(t * 0.5 + b.ph2);
-      rho = rho * (1 - b.f * 0.08) * ease;
+      rho = rho * (1 - f * 0.08) * ease;
 
       const x = S / 2 + Math.cos(ang) * rho;
       const y = S / 2 + Math.sin(ang) * rho * 0.96;
 
-      const s = b.size * ease * (1 + b.f * 0.25);
+      const s = b.size * ease * (1 + f * 0.25);
       if (Math.abs(s - b.cur) > 0.05) {
         b.cur = s;
         const px = s + "px";
@@ -921,13 +938,13 @@ document.addEventListener("DOMContentLoaded", () => {
           const rx = b.px - fl - b.gx - x, ry = b.py - ft - b.gy - y;
           const m = Math.hypot(rx, ry);
           if (m > 0.01) {
-            const L = AV * 0.8; // furthest it can be pulled
+            const L = AV * 0.5; // furthest it can be pulled
             const k = L * Math.tanh(m / L) / m;
             gx = rx * k;
             gy = ry * k;
           }
         }
-        const stiff = b.drag ? 220 : 170, damp = 2 * (b.drag ? 0.62 : 0.3) * Math.sqrt(stiff);
+        const stiff = b.drag ? 240 : 190, damp = 2 * (b.drag ? 0.7 : 0.42) * Math.sqrt(stiff);
         const steps = Math.ceil(dt / (1 / 120)) || 1, h = dt / steps;
         for (let i = 0; i < steps; i++) {
           J.vx += (stiff * (gx - J.ox) - damp * J.vx) * h;
@@ -940,7 +957,7 @@ document.addEventListener("DOMContentLoaded", () => {
           J.ox = J.oy = J.vx = J.vy = 0;
           tf = `translate(${tx}px, ${ty}px)`;
         } else {
-          const st = Math.min(0.4, 0.6 * m / s + 0.01 * sp / s);              // how much longer along the motion
+          const st = Math.min(0.2, 0.32 * m / s + 0.005 * sp / s);              // how much longer along the motion
           const axis = m > 0.5 ? Math.atan2(J.oy, J.ox) : Math.atan2(J.vy, J.vx);
           const deg = (axis * 180 / Math.PI).toFixed(2);
           tf = `translate(${(tx + J.ox).toFixed(2)}px, ${(ty + J.oy).toFixed(2)}px) rotate(${deg}deg) ` +

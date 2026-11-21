@@ -124,6 +124,7 @@ body {
   width: 100%;
   overflow: hidden;
   background-color: var(--bkg);
+  touch-action: manipulation; /* pinch-zoom stays available (accessibility); only the double-tap zoom delay is removed */
 }
 
 @supports (height: 100dvh) {
@@ -146,6 +147,7 @@ body {
   width: 100%;
   height: 100%;
   display: block;
+  background-color: #121214; /* the colour of the canvas edge: iOS tints the status bar from a fixed element's colour, since it cannot read a canvas */
   z-index: 1;
   pointer-events: none;
   contain: strict;
@@ -182,11 +184,7 @@ body {
   animation: fadeIn .9s var(--effect-timing) 1s backwards;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .top-section {
-    animation: none;
-  }
-}
+/* (reduced motion: see the block at the end of the file) */
 
 .top-section .logo {
   max-width: 400px;
@@ -280,7 +278,7 @@ body {
   position: absolute;
   left: 0;
   top: 0;
-  z-index: 12;
+  z-index: calc(12 + var(--k, 0)); /* --k (set by the script) keeps the overlap order of the bubbles */
 }
 
 .bubble-slot.on {
@@ -412,6 +410,30 @@ body {
   }
 }
 
+/* ---- Glow while pressed or dragged (a halo around the bubble and a brighter rim) ---- */
+.bubbles .bubble.pressed {
+  box-shadow: 0 22px 48px rgba(0, 0, 0, .32), 0 0 30px 6px rgba(255, 255, 255, .4);
+}
+
+.bubbles .bubble.pressed .glass-specular {
+  box-shadow: inset 0 0 16px rgba(255, 255, 255, .55), inset 1px 1px 1px rgba(255, 255, 255, .5), inset -1px -1px 1px rgba(255, 255, 255, .3);
+}
+
+/* HDR: on a display and browser that can show light brighter than white, the glow does (peaks of roughly 400 to
+   600 nits instead of white). Anywhere else the rules above apply unchanged. */
+@media (dynamic-range: high) {
+  @supports (color: color(rec2100-pq 1 1 1)) {
+    .bubbles .bubble.pressed {
+      dynamic-range-limit: no-limit;
+      box-shadow: 0 22px 48px rgba(0, 0, 0, .32), 0 0 30px 6px color(rec2100-pq .66 .66 .66 / .55);
+    }
+
+    .bubbles .bubble.pressed .glass-specular {
+      box-shadow: inset 0 0 16px color(rec2100-pq .72 .72 .72 / .7), inset 1px 1px 1px color(rec2100-pq .7 .7 .7 / .8), inset -1px -1px 1px color(rec2100-pq .6 .6 .6 / .6);
+    }
+  }
+}
+
 @media (hover: none) {
   .bubbles .bubble.pressed {
     background: radial-gradient(100px circle at 50% 50%, rgba(255, 255, 255, .6) 0%, rgba(255, 255, 255, .2) 30%, rgba(255, 255, 255, 0) 60%);
@@ -430,24 +452,50 @@ body {
   }
 }
 
-/* ---- Being dragged (after the press rules above, so it wins over them) ----
-   The pull is the feedback: the bubble is held a little larger, the press flash is gentler and the icon is not
-   blurred, so a stretched bubble still reads clearly. */
+/* ---- Being dragged ----
+   Same look as a press (the glow and the soft icon stay for as long as it is held); the pull itself is the motion. */
 .bubbles .bubble.dragging {
   cursor: grabbing;
 }
 
-.bubbles .bubble.pressed.dragging {
-  animation: none;
-  transform: scale(1.25);
-}
+/* ==========================================================================
+   Reduced motion
+   Everything fades in and nothing moves: no springs, no pop, no bounce, no scaling, no drift, no drag. The
+   bubbles still glow (and the icon still softens) when hovered, focused, pressed or touched.
+   (Last in the file so it wins over the rules above; noscript.css has its own matching block.)
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  @keyframes fadeOnly {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
 
-.bubbles .bubble.pressed.dragging .glass-filter {
-  filter: brightness(1.45) contrast(1.15) saturate(1.2);
-}
+  #bg {
+    animation: fadeOnly .9s linear;
+  }
 
-.bubbles .bubble.pressed.dragging .glass-content img {
-  animation: none;
-  transform: none;
-  filter: none;
+  .bubble-avatar {
+    animation: fadeOnly .6s linear .15s forwards;
+  }
+
+  .top-section {
+    animation: fadeOnly .6s linear .25s backwards;
+  }
+
+  /* the slot fades (not the bubble): the bubble's own animation property is free for its states */
+  .bubble-slot {
+    animation: fadeOnly .6s linear .25s backwards;
+  }
+
+  .bubbles .bubble,
+  .glass-content img,
+  .bubbles .bubble.on,
+  .bubbles .bubble.on .glass-content img,
+  .bubbles .bubble:focus,
+  .bubbles .bubble:focus .glass-content img,
+  .bubbles .bubble.pressed,
+  .bubbles .bubble.pressed .glass-content img {
+    animation: none;
+    transform: none;
+  }
 }
