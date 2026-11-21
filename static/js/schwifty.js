@@ -149,10 +149,8 @@ class TextScramble {
    Page lifecycle
    ========================================================================== */
 
-/** Activates Analytics and TextScramble effect */
+/** Activates the TextScramble effect (page views are counted by GoatCounter's own script) */
 window.addEventListener("load", () => {
-  gtag("js", new Date());
-  gtag("config", "G-FMEDZDBVNJ");
   const fx = new TextScramble(greeting);
   let i = 0;
   const rotate = () => {
@@ -212,7 +210,7 @@ function handleExternalRedirect(route) {
   if (!route) return;
   const config = redirects[route];
   if (config) {
-    gtag("event", "click", { event_category: config.category });
+    track("redirect-" + config.category);
     showActionNotification(config.message, 3500);
     window.open(config.url, "_self");
   } else {
@@ -255,10 +253,14 @@ function showActionNotification(text, timeout) {
   }, timeout);
 }
 
-/** Pushes to Analytics */
-function gtag() {
-  window.dataLayer = window.dataLayer || [];
-  dataLayer.push(arguments);
+/** Counts an event in GoatCounter (cookieless, no personal data). Its script loads async, so if it is not
+    there yet the call waits a moment (up to ~5s) and tries again; with the script blocked it just does nothing. */
+function track(name, tries = 10) {
+  if (window.goatcounter && typeof window.goatcounter.count === "function") {
+    window.goatcounter.count({ path: name, title: name, event: true });
+  } else if (tries > 0) {
+    setTimeout(() => track(name, tries - 1), 500);
+  }
 }
 
 /* ==========================================================================
@@ -726,7 +728,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     icon.addEventListener("click", () => {
-      gtag("event", "click", { event_category: icon.id });
+      track("click-" + icon.id);
       if ("vibrate" in navigator) {
         navigator.vibrate([10, 30, 10]); // Layered haptic feedback
       }
