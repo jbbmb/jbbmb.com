@@ -529,16 +529,15 @@ function createBackground({ reduce, getOrigin }) {
 
 /* ==========================================================================
    Intro: the signature block drops out of the avatar
-   The signature and tagline themselves (no background) start as a soft, blurred speck behind the avatar,
+   The signature and tagline themselves (no background) start as a small speck behind the avatar,
    fall out of its lower edge stretching with speed, overshoot their place on a spring, and pop to full
-   size while the blur resolves. Skipped under reduced motion. Leaves no inline styles behind when done.
+   size. Skipped under reduced motion. Leaves no inline styles behind when done.
    ========================================================================== */
 function createIntro({ el, getGeometry, at }) {
   const BORN = at;                      // s: the same moment the bubbles and avatar enter
   const FALL = { a: 4.2, w: 8.5 };      // spring for the fall: ~21% overshoot, lands after ~0.24s
   const POP = { at: 0.05, a: 7, w: 11 }; // growth to full size, ~13% overshoot
   const START_SCALE = 0.1;
-  const START_BLUR = 10;                // px
   const END = 1.7;                      // s after BORN: every spring has settled to well under a pixel
 
   /* Underdamped spring from 1 to 0 (starting at rest), and its derivative */
@@ -556,7 +555,7 @@ function createIntro({ el, getGeometry, at }) {
     if (tau < 0) return;
     if (tau > END) {
       done = true;
-      el.style.opacity = el.style.filter = el.style.transform = ""; // keep animation:none, or the CSS fade would replay
+      el.style.opacity = el.style.transform = ""; // keep animation:none, or the CSS fade would replay
       return;
     }
 
@@ -570,9 +569,7 @@ function createIntro({ el, getGeometry, at }) {
     const P = 1 - spring(POP.a, POP.w, Math.max(0, tau - POP.at));
     const s = START_SCALE + (1 - START_SCALE) * P;
 
-    const blur = START_BLUR * (1 - smooth((tau - 0.1) / 0.7));
     el.style.opacity = smooth(tau / 0.3);
-    el.style.filter = blur > 0.05 ? `blur(${blur.toFixed(2)}px)` : "none";
     el.style.transform = `translate3d(${dx}px, ${dy}px, 0) scale(${s / sq}, ${s * sq})`;
   });
 }

@@ -27,15 +27,13 @@
 /* ==========================================================================
    Keyframes
    ========================================================================== */
-@keyframes blurIn {
+@keyframes fadeIn {
   0% {
     opacity: 0;
-    filter: blur(5px);
   }
 
   50% {
     opacity: .5;
-    filter: blur(2.5px);
   }
 
   100% {
@@ -172,16 +170,16 @@ body {
   z-index: 2;
 }
 
-/* Signature and tagline. They arrive by dropping out of the avatar: schwifty.js (createIntro) moves, scales and
-   un-blurs this block for ~1.7s, then hands it back with no inline styles left. It sits at z-index 9 so it
+/* Signature and tagline. They arrive by dropping out of the avatar: schwifty.js (createIntro) moves and
+   scales this block for ~1.7s, then hands it back with no inline styles left. It sits at z-index 9 so it
    starts hidden behind the avatar (10) and passes behind the bubbles (12). The block itself is what
-   animates, not a background: an element that fades or is filtered becomes a "backdrop root", which is why
+   animates, not a background: an element that fades becomes a "backdrop root", which is why
    the fade is on this block and never on .page-content (the bubbles' glass would have nothing to blur).
    The CSS animation below is only the fallback if the script does not run; the script cancels it. */
 .top-section {
   position: relative;
   z-index: 9;
-  animation: blurIn .9s var(--effect-timing) 1s backwards;
+  animation: fadeIn .9s var(--effect-timing) 1s backwards;
 }
 
 @media (prefers-reduced-motion: reduce) {
