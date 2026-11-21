@@ -247,6 +247,50 @@ body {
   }
 }
 
+/* ---- Short landscape screens (a phone on its side, a short browser window) ----
+   A column would leave the bubbles tiny next to a signature that is wider than the whole cluster. Side by side
+   the cluster takes the full height of the screen, on the right where the thumb is, with the signature on the left.
+   (The signature still drops out of the avatar: the intro works from where each one ends up.)
+   The sides get 2.5rem (more where there is a notch) so a line of text, which is held slightly larger while it
+   is a description or a message, never touches the edge of the screen. */
+@media (orientation: landscape) and (max-height: 540px) {
+  :root {
+    --lw: min(34vw, 380px); /* the signature column */
+    --lgap: 1.5rem;
+    --lpx: calc(max(2.5rem, env(safe-area-inset-left)) + max(2.5rem, env(safe-area-inset-right)));
+    --lpy: calc(max(1.25rem, env(safe-area-inset-top)) + max(1.25rem, env(safe-area-inset-bottom)));
+    --LS: min(calc(100vh - var(--lpy)), calc(100vw - var(--lpx) - var(--lgap) - var(--lw)), 520px);
+  }
+
+  @supports (height: 100dvh) {
+    :root {
+      --LS: min(calc(100dvh - var(--lpy)), calc(100vw - var(--lpx) - var(--lgap) - var(--lw)), 520px);
+    }
+  }
+
+  .page-content {
+    flex-direction: row-reverse; /* cluster on the right, signature on the left */
+    gap: var(--lgap);
+    padding-left: max(2.5rem, env(safe-area-inset-left));
+    padding-right: max(2.5rem, env(safe-area-inset-right));
+  }
+
+  .bubbles {
+    --S: var(--LS);
+  }
+
+  .top-section {
+    flex: none;
+    width: var(--lw);
+  }
+
+  #greeting,
+  #description,
+  #action {
+    text-wrap: balance; /* a line that wraps in the narrower column breaks evenly */
+  }
+}
+
 .bubble-avatar {
   position: absolute;
   left: 50%;
