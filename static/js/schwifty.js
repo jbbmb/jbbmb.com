@@ -51,7 +51,7 @@ const phrases = [
 const redirects = {
   "?cvitae_pdf": {
     url: "#",
-    message: "Curriculum Vitæ not available!",
+    message: "Not available for hire right now.",
     category: "cvitae_pdf"
   },
   "?system_status": {
