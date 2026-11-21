@@ -19,7 +19,7 @@
 }
 
 #greeting::before {
-  content: 'Designed this assuming you like JavaScript.';
+  content: 'Designed this assuming you loved JavaScript.';
 }
 
 /* ---- Background: a static, quiet version of the animated one ---- */
