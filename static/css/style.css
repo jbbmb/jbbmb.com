@@ -7,6 +7,7 @@
   color-scheme: dark;
   --accent-color: #fc9e0e;
   --bkg: #1C1C1E;
+  --chrome: #0e0e10; /* the page's own background: what iOS Safari tints its status and toolbar bands with; the average of the animated background's top and bottom edges */
   --effect-timing: ease;
 }
 
@@ -123,7 +124,7 @@ body {
   height: 100%;
   width: 100%;
   overflow: hidden;
-  background-color: var(--bkg);
+  background-color: var(--chrome);
   touch-action: manipulation; /* pinch-zoom stays available (accessibility); only the double-tap zoom delay is removed */
 }
 
@@ -147,7 +148,7 @@ body {
   width: 100%;
   height: 100%;
   display: block;
-  background-color: #121214; /* the colour of the canvas edge: iOS tints the status bar from a fixed element's colour, since it cannot read a canvas */
+  background-color: var(--chrome); /* same colour as the page: a fixed element's colour can also tint the iOS bars */
   z-index: 1;
   pointer-events: none;
   contain: strict;

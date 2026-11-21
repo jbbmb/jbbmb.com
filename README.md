@@ -33,4 +33,4 @@ All other content, source code, design, and assets not explicitly attributed are
 
 This website is provided "as is" without any warranties. No liability is accepted for any loss or damages arising from its use.
 
-Built with help from Claude (Anthropic).
+###### 🤖 Built with help from Claude, by Anthropic.

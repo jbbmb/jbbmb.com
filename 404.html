@@ -4,32 +4,30 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy"
-    content="base-uri 'self' https://www.googletagmanager.com https://www.google-analytics.com; frame-ancestors 'none';">
-  <meta name="viewport"
-    content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, shrink-to-fit=no">
-  <title>João de Macedo Borges</title>
-  <link rel="canonical" href="https://jbbmb.com">
-  <meta property="og:title" content="João de Macedo Borges" />
-  <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://jbbmb.com" />
-  <meta property="og:image" content="https://jbbmb.com/static/favicons/avatar-touch-icon.png" />
-  <meta name="description"
-    content="Homo Sapiens specimen in his late 20s based in Porto, Portugal. Studies software and cybersecurity, values privacy, UX design, and believes in meaningful work and integrated technology.">
+  <meta http-equiv="Content-Security-Policy" content="base-uri 'self';">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Page not found | João de Macedo Borges</title>
+  <meta name="robots" content="noindex">
   <meta name="author" content="João de Macedo Borges">
-  <link rel="shortcut icon" href="static/favicons/favicon.ico" />
-  <link rel="icon" type="image/x-icon" sizes="16x16" href="static/favicons/favicon.ico">
-  <link rel="icon" sizes="32x32" href="static/favicons/favicon-32.png">
-  <link rel="apple-touch-icon" sizes="57x57 72x72 180x180 114x114 120x120 144x144 152x152"
-    href="static/favicons/avatar-touch-icon.png">
-  <meta name="msapplication-TileColor" content="#000000">
-  <meta name="msapplication-TileImage" content="static/favicons/favicon-144.png">
-  <meta name="theme-color" content="#000000">
-  <meta http-equiv="refresh" content="0.0;url=https://jbbmb.com?404">
-  <link rel="manifest" href="manifest.json">
-  <link rel="icon" sizes="192x192" href="static/favicons/favicon-192.png">
+  <link rel="icon" href="/static/favicons/favicon.ico" sizes="48x48">
+  <link rel="icon" type="image/png" sizes="96x96" href="/static/favicons/favicon-96x96.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/static/favicons/apple-touch-icon.png">
+  <meta name="msapplication-TileColor" content="#0e0e10">
+  <meta name="msapplication-TileImage" content="/static/favicons/web-app-manifest-192x192.png">
+  <meta name="theme-color" content="#0e0e10">
+  <link rel="manifest" href="/manifest.json">
+  <!-- Straight back to the home page; it shows "The requested page was not found!" for a few seconds (?404) -->
+  <meta http-equiv="refresh" content="0;url=https://jbbmb.com/?404">
+  <!-- Same dark page as the home page, so nothing flashes white while it redirects -->
+  <style>
+    :root { color-scheme: dark; }
+    html, body { margin: 0; height: 100%; background: #0e0e10; }
+    a { position: fixed; inset: 0; display: grid; place-items: center; color: #fff; font: 16px/1.4 system-ui, sans-serif; text-decoration: none; }
+  </style>
 </head>
 
-<body></body>
+<body>
+  <a href="https://jbbmb.com/?404">Back to jbbmb.com</a> <!-- only seen if the redirect above is blocked -->
+</body>
 
 </html>

@@ -19,11 +19,12 @@
 }
 
 #greeting::before {
-  content: 'Designed this assuming you love JavaScript.';
+  content: 'Designed this assuming you like JavaScript.';
 }
 
 /* ---- Background: a static, quiet version of the animated one ---- */
 body {
+  background-color: var(--bkg); /* no animated background here, so the page keeps its lighter base colour */
   background-image:
     radial-gradient(ellipse 80% 65% at 50% 45%, rgba(10, 10, 12, 0) 0%, rgba(10, 10, 12, .22) 70%, rgba(6, 6, 8, .42) 100%),
     radial-gradient(circle, rgba(252, 158, 14, .2) 1.5px, transparent 2px);
