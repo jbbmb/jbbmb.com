@@ -602,12 +602,17 @@ document.addEventListener("DOMContentLoaded", () => {
       base: (i / all.length) * Math.PI * 2 - Math.PI / 2, // starting angle
       ph: Math.random() * 6.28,
       ph2: Math.random() * 6.28,
+      j: { ox: 0, oy: 0, vx: 0, vy: 0 }, // jelly: how far the bubble is pulled from its orbit spot (px) and how fast it moves
+      x: 0, y: 0,                         // centre in the field, last frame
+      drag: false,                        // being dragged right now
+      dragged: false,                     // was dragged since the last press: the release must not open the link
+      down: null,                         // the press that may become a drag
+      px: 0, py: 0, gx: 0, gy: 0,         // pointer, and where on the bubble it grabbed
+      tf: "",                             // transform last written to the DOM
       f: 0,    // current "closer" amount (0..1)
       fT: 0,   // target "closer" amount
       size: 0, // base size, px
-      cur: -1, // size last written to the DOM
-      tx: NaN, // translate last written to the DOM
-      ty: NaN
+      cur: -1  // size last written to the DOM
     };
   });
 
@@ -619,6 +624,8 @@ document.addEventListener("DOMContentLoaded", () => {
   let raisedBy = null;   // "mouse" | "touch" | "key"
   let lastTouch = 0;     // browsers fire compatibility mouse events after a touch; those must be ignored
   let lastHoverCheck = 0;
+  let fl = 0, ft = 0;    // the field's top-left corner in the viewport
+  const DRAG_SLOP = 10;  // px a press must travel before it is a drag; less than that is a normal click
 
   /* ---- Bring a bubble closer / put it back ---- */
   const raise = (b, by = "mouse") => {
@@ -652,8 +659,16 @@ document.addEventListener("DOMContentLoaded", () => {
       pressed = null;
     }
   };
-  addEventListener("pointerup", releasePress, true);
-  addEventListener("pointercancel", releasePress, true);
+  /* A drag ends on release (or if the browser takes the pointer away): the bubble springs back */
+  const endDrag = b => {
+    b.down = null;
+    if (!b.drag) return;
+    b.drag = false;
+    b.el.classList.remove("dragging");
+  };
+  const endDrags = () => bubbles.forEach(endDrag);
+  addEventListener("pointerup", () => { releasePress(); endDrags(); }, true);
+  addEventListener("pointercancel", () => { releasePress(); endDrags(); }, true);
   addEventListener("mouseup", releasePress, true);
   addEventListener("dragend", releasePress, true);
   addEventListener("blur", releasePress);
@@ -661,6 +676,7 @@ document.addEventListener("DOMContentLoaded", () => {
   /* Clears everything: page hidden, restored from the back/forward cache, or the cursor left the window */
   resetBubbles = () => {
     releasePress();
+    endDrags();
     lower();
     hideDescriptionNotification(null, description, greeting, action);
   };
@@ -718,6 +734,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     icon.addEventListener("touchmove", (event) => {
+      if (b.drag) return; // being dragged: it follows the finger, so "finger left the button" no longer applies
       const touch = event.touches[0];
       const target = document.elementFromPoint(touch.clientX, touch.clientY);
       if (!icon.contains(target)) {
@@ -728,7 +745,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     icon.addEventListener("touchend", () => {
       lastTouch = Date.now();
-      if (flagTouchingTarget && icon.id != "mail") {
+      if (flagTouchingTarget && icon.id != "mail" && !b.dragged) {
         icon.click();
       } else {
         flagTouchingTarget = false;
@@ -742,11 +759,61 @@ document.addEventListener("DOMContentLoaded", () => {
       pressed = icon;
       icon.classList.add("pressed");
     });
-    icon.addEventListener("pointerleave", releasePress);
+    icon.addEventListener("pointerleave", () => {
+      releasePress();
+      if (!b.drag) b.down = null; // left before it became a drag
+    });
+
+    /* Jelly: a press pokes the bubble (it gives way, then wobbles back); dragging pulls it like rubber; release
+       springs it back. The motion itself is in the frame loop below. */
+    if (!reduce) {
+      icon.draggable = false;
+      icon.addEventListener("keydown", () => { b.dragged = false; });
+      icon.addEventListener("pointerdown", e => {
+        if (e.pointerType === "mouse" && e.button !== 0) return;
+        b.dragged = false;
+        b.down = { id: e.pointerId, x: e.clientX, y: e.clientY };
+        b.px = e.clientX;
+        b.py = e.clientY;
+        const dx = fl + b.x - e.clientX, dy = ft + b.y - e.clientY;
+        const len = Math.hypot(dx, dy) || 1;
+        const kick = Math.min(1, len / (b.cur * 0.5 || 1)) * b.cur * 4; // harder the further from the centre
+        b.j.vx += (dx / len) * kick;
+        b.j.vy += (dy / len) * kick;
+      });
+      icon.addEventListener("pointermove", e => {
+        if (!b.down || e.pointerId !== b.down.id) return;
+        b.px = e.clientX;
+        b.py = e.clientY;
+        if (!b.drag && Math.hypot(e.clientX - b.down.x, e.clientY - b.down.y) > DRAG_SLOP) {
+          b.drag = true;
+          b.dragged = true;
+          b.gx = b.down.x - fl - b.x; // where on the bubble it was grabbed: that spot stays under the finger
+          b.gy = b.down.y - ft - b.y;
+          icon.classList.add("dragging");
+          try { icon.setPointerCapture(e.pointerId); } catch (_) { /* the drag still works while over the bubble */ }
+          showDescriptionNotification(icon, description, greeting, action);
+          raise(b, e.pointerType === "mouse" ? "mouse" : "touch");
+        }
+      });
+      icon.addEventListener("lostpointercapture", e => {
+        if (e.target === icon) endDrag(b); // not the inner element handing the pointer over (touch captures it implicitly)
+      });
+    }
     icon.addEventListener("dragstart", e => e.preventDefault()); // links must not start a native drag
   });
 
   /* Only the cursor position is tracked, for the "still under the cursor?" check in the frame loop */
+  /* A release after a drag must not open the link (this runs before the link's own click handlers) */
+  field.addEventListener("click", e => {
+    const b = bubbles.find(o => o.el.contains(e.target));
+    if (b && b.dragged) {
+      e.preventDefault();
+      e.stopPropagation();
+      b.dragged = false;
+    }
+  }, true);
+
   body.addEventListener("mousemove", event => {
     mouseX = event.clientX;
     mouseY = event.clientY;
@@ -767,6 +834,8 @@ document.addEventListener("DOMContentLoaded", () => {
       b.cur = -1; // forces the next frame to write the size
     }
     const r = field.getBoundingClientRect();
+    fl = r.left;
+    ft = r.top;
     ox = r.left + r.width / 2;
     oy = r.top + r.height / 2;
     if (topSection) {
@@ -798,7 +867,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let rot = 0;
 
   onFrame((t, dt, now) => {
-    if (raisedBy === "mouse" && now - lastHoverCheck > 120) {
+    if (raisedBy === "mouse" && now - lastHoverCheck > 120 && !bubbles.some(o => o.drag)) {
       lastHoverCheck = now;
       const hit = document.elementFromPoint(mouseX, mouseY);
       if (!hit || !focused.el.contains(hit)) {
@@ -836,11 +905,53 @@ document.addEventListener("DOMContentLoaded", () => {
         b.el.style.padding = s * 0.23 + "px";
       }
 
+      b.x = x;
+      b.y = y;
       const tx = snap(x - s / 2), ty = snap(y - s / 2);
-      if (tx !== b.tx || ty !== b.ty) {
-        b.tx = tx;
-        b.ty = ty;
-        b.slot.style.transform = `translate(${tx}px, ${ty}px)`;
+
+      /* Jelly. While dragged, the bubble is pulled toward the pointer through a rubber band (1:1 at first, then
+         it resists) and follows on a soft spring; on release the spring is looser, so it overshoots and wobbles
+         back. It stretches along its motion and thins across it, keeping its area. At rest nothing is applied
+         but the plain translate, so the glass and the icon stay sharp. */
+      const J = b.j;
+      let tf;
+      if (!reduce && (b.drag || J.ox || J.oy || J.vx || J.vy)) {
+        let gx = 0, gy = 0;
+        if (b.drag) {
+          const rx = b.px - fl - b.gx - x, ry = b.py - ft - b.gy - y;
+          const m = Math.hypot(rx, ry);
+          if (m > 0.01) {
+            const L = AV * 0.8; // furthest it can be pulled
+            const k = L * Math.tanh(m / L) / m;
+            gx = rx * k;
+            gy = ry * k;
+          }
+        }
+        const stiff = b.drag ? 220 : 170, damp = 2 * (b.drag ? 0.62 : 0.3) * Math.sqrt(stiff);
+        const steps = Math.ceil(dt / (1 / 120)) || 1, h = dt / steps;
+        for (let i = 0; i < steps; i++) {
+          J.vx += (stiff * (gx - J.ox) - damp * J.vx) * h;
+          J.vy += (stiff * (gy - J.oy) - damp * J.vy) * h;
+          J.ox += J.vx * h;
+          J.oy += J.vy * h;
+        }
+        const m = Math.hypot(J.ox, J.oy), sp = Math.hypot(J.vx, J.vy);
+        if (!b.drag && m < 0.25 && sp < 6) {
+          J.ox = J.oy = J.vx = J.vy = 0;
+          tf = `translate(${tx}px, ${ty}px)`;
+        } else {
+          const st = Math.min(0.4, 0.6 * m / s + 0.01 * sp / s);              // how much longer along the motion
+          const axis = m > 0.5 ? Math.atan2(J.oy, J.ox) : Math.atan2(J.vy, J.vx);
+          const deg = (axis * 180 / Math.PI).toFixed(2);
+          tf = `translate(${(tx + J.ox).toFixed(2)}px, ${(ty + J.oy).toFixed(2)}px) rotate(${deg}deg) ` +
+               `scale(${(1 + st).toFixed(4)}, ${(1 / Math.sqrt(1 + st)).toFixed(4)}) rotate(${-deg}deg)`;
+        }
+      } else {
+        tf = `translate(${tx}px, ${ty}px)`;
+      }
+      if (tf !== b.tf) {
+        b.tf = tf;
+        b.slot.style.transform = tf;
       }
     }
   });

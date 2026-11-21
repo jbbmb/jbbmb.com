@@ -305,6 +305,11 @@ body {
   animation: offHoverBounce .5s var(--effect-timing);
   box-shadow: 0 10px 26px rgba(0, 0, 0, .22), 0 1px 3px rgba(0, 0, 0, .14);
   transition: box-shadow .3s;
+  touch-action: none;           /* a drag on a bubble is the bubble's, not the page's (no scroll / zoom gestures) */
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  -webkit-touch-callout: none;
   visibility: hidden;
   /* not opacity: a fading bubble is a backdrop root and its glass would show nothing */
 }
@@ -423,4 +428,26 @@ body {
     transform: scale(1.2);
     filter: blur(3px);
   }
+}
+
+/* ---- Being dragged (after the press rules above, so it wins over them) ----
+   The pull is the feedback: the bubble is held a little larger, the press flash is gentler and the icon is not
+   blurred, so a stretched bubble still reads clearly. */
+.bubbles .bubble.dragging {
+  cursor: grabbing;
+}
+
+.bubbles .bubble.pressed.dragging {
+  animation: none;
+  transform: scale(1.25);
+}
+
+.bubbles .bubble.pressed.dragging .glass-filter {
+  filter: brightness(1.45) contrast(1.15) saturate(1.2);
+}
+
+.bubbles .bubble.pressed.dragging .glass-content img {
+  animation: none;
+  transform: none;
+  filter: none;
 }
