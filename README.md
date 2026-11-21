@@ -1,11 +1,13 @@
 ## 🎨 Design Evolution
 <p align="center"><img src="static/assets/timeline.png"/></p>
 
+## 🍀 Contributors
+This project got a lot of love and support from [Mário Matias](https://www.linkedin.com/in/jmamatias), [Francisco Araújo](https://www.linkedin.com/in/franciscoeparaujo), [Miguel Martins](https://instagram.com/miguelmartinsmm), [Mariana Preto](https://www.linkedin.com/in/mariana-preto), [Pedro Mouta](https://www.linkedin.com/in/pedro-mouta-52080124a) and [Ana Júlia Torres](https://www.linkedin.com/in/ana-júlia-torres-7b7b0130a/).
+
 ## 🔌 Service Status
 You can always check if everything is up and running at [status.jbbmb.com](http://status.jbbmb.com).
 
-## 🍀 Contributors
-This project got a lot of love and support from [Mário Matias](https://www.linkedin.com/in/jmamatias), [Francisco Araújo](https://www.linkedin.com/in/franciscoeparaujo), [Miguel Martins](https://instagram.com/miguelmartinsmm), [Mariana Preto](https://www.linkedin.com/in/mariana-preto), [Pedro Mouta](https://www.linkedin.com/in/pedro-mouta-52080124a) and [Ana Júlia Torres](https://www.linkedin.com/in/ana-júlia-torres-7b7b0130a/).
+[![Deploy static content to Pages](https://github.com/jbbmb/jbbmb.com/actions/workflows/static.yml/badge.svg)](https://github.com/jbbmb/jbbmb.com/actions/workflows/static.yml)
 
 ## 🫆 Privacy Policy
 jbbmb.com itself does not use cookies or track You through browser storage mechanisms.
