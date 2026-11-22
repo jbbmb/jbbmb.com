@@ -627,7 +627,7 @@ function createIntro({ el, getGeometry, at }) {
    ========================================================================== */
 function watchImages() {
   const failed = img => {
-    const box = img.parentElement;
+    const box = img.parentElement && img.parentElement.tagName === "PICTURE" ? img.parentElement.parentElement : img.parentElement;
     if (!box) return;
     box.classList.add("img-failed");
     const bubble = box.closest(".bubble");

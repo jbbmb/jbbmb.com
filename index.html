@@ -382,6 +382,10 @@
       animation: avatarPop 1s .15s cubic-bezier(.3, 1.9, .4, 1) forwards;
     }
 
+    .bubble-avatar picture {
+      display: contents;
+    }
+
     .bubble-avatar img {
       display: block;
       width: 100%;
@@ -398,7 +402,8 @@
     }
 
     /* ---- When an image fails to load (see watchImages in schwifty.js): text takes its place ---- */
-    .img-failed>img {
+    .img-failed>img,
+    .img-failed>picture {
       display: none;
     }
 
@@ -698,10 +703,7 @@
 <body>
   <main class="page-content">
     <nav class="bubbles" id="bubbles" aria-label="Links">
-      <div class="bubble-avatar" id="bubble-avatar"><img src="static/assets/avatar.webp"
-          srcset="static/assets/avatar-256.webp 256w, static/assets/avatar-384.webp 384w, static/assets/avatar.webp 512w"
-          sizes="min(208px, calc((100vw - 40px) / 2.5))" width="512" height="512" alt="" fetchpriority="high"
-          decoding="async"></div>
+      <div class="bubble-avatar" id="bubble-avatar"><picture><source type="image/webp" srcset="static/assets/avatar-256.webp 256w, static/assets/avatar-384.webp 384w, static/assets/avatar.webp 512w" sizes="min(208px, calc((100vw - 40px) / 2.5))"><img src="static/favicons/avatar-touch-icon.png" width="512" height="512" alt="" fetchpriority="high" decoding="async"></picture></div>
       <a href="https://www.linkedin.com/in/jbbmb" target="_self" id="linkedin" class="bubble" tabindex="0"
         aria-label="Documents his career on LinkedIn." data-slot="5" data-z="0.5" data-r="0.55">
         <div class="glass-filter"></div>
