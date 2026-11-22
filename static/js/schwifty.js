@@ -49,11 +49,6 @@ const phrases = [
 
 /** Routing config */
 const redirects = {
-  "?cvitae_pdf": {
-    url: "#",
-    message: "Not available for hire right now.",
-    category: "cvitae_pdf"
-  },
   "?system_status": {
     url: "https://stats.uptimerobot.com/OXmELf5EPJ",
     message: "Opening UptimeRobot...",
@@ -68,7 +63,7 @@ const redirects = {
 
 /** Names used in the "Opening ..." notification, by bubble id (a data-name attribute wins if present) */
 const bubbleNames = {
-  cvitae: "LinkedIn",
+  linkedin: "LinkedIn",
   git: "GitHub",
   shortcuts: "RoutineHub",
   videos: "YouTube",
@@ -963,7 +958,7 @@ document.addEventListener("DOMContentLoaded", () => {
           const axis = m > 0.5 ? Math.atan2(J.oy, J.ox) : Math.atan2(J.vy, J.vx);
           const deg = (axis * 180 / Math.PI).toFixed(2);
           tf = `translate(${(tx + J.ox).toFixed(2)}px, ${(ty + J.oy).toFixed(2)}px) rotate(${deg}deg) ` +
-               `scale(${(1 + st).toFixed(4)}, ${(1 / Math.sqrt(1 + st)).toFixed(4)}) rotate(${-deg}deg)`;
+            `scale(${(1 + st).toFixed(4)}, ${(1 / Math.sqrt(1 + st)).toFixed(4)}) rotate(${-deg}deg)`;
         }
       } else {
         tf = `translate(${tx}px, ${ty}px)`;
