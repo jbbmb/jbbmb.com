@@ -34,7 +34,6 @@ const getMonthBasedIntro = () => {
 const phrases = [
   "Homo Sapiens specimen in his late 20s.",
   getTimeBasedIntro,
-  getMonthBasedIntro,
   "Currently lives in the city of Porto.",
   "Born in northern Portugal, Earth.",
   "Raised in a big family with no religion.",
@@ -60,6 +59,7 @@ const phrases = [
   "Believes in climate change and vaccines.",
   "Votes every time there is an election.",
   "Overthinks a lot, including this sentence.",
+  getMonthBasedIntro,
   "Thanks You for visiting."
 ];
 
@@ -229,7 +229,7 @@ function handleExternalRedirect(route) {
     showActionNotification(config.message, 3500);
     window.open(config.url, "_self");
   } else {
-    showActionNotification("The requested page was not found!", 3500);
+    showActionNotification("The requested page was not found.", 3500);
   }
 }
 
@@ -645,24 +645,6 @@ function watchImages() {
 }
 
 /* ==========================================================================
-   Entrance sound
-   One soft pop as the bubbles and the signature come in. Browsers only allow sound before the visitor has
-   touched the page in some cases (an installed web app, a site they have used before), so when playback is
-   refused it stays silent: it never waits for a later tap, which would make no sense. Not played with reduced
-   motion (nothing pops in then), nor in a tab that is in the background.
-   ========================================================================== */
-function playEntranceSound(delayMs) {
-  const sfx = new Audio("static/assets/bubble.mp3");
-  sfx.preload = "auto"; // start fetching right away so it is ready when the bubbles appear
-  sfx.volume = 0.6;
-  setTimeout(() => {
-    if (document.hidden) return;
-    const started = sfx.play();
-    if (started && started.catch) started.catch(() => { }); // refused by the browser: silence
-  }, delayMs);
-}
-
-/* ==========================================================================
    Bubbles (the former .glass-icon tiles)
    Orbit, entrance and "closer to the user" motion, plus the original interaction logic.
    ========================================================================== */
@@ -1051,7 +1033,6 @@ document.addEventListener("DOMContentLoaded", () => {
   if (!reduce && topSection) {
     createIntro({ el: topSection, at: ENTER_DELAY, getGeometry: () => ({ ox, oy, tx: sig.tx, ty: sig.ty }) });
   }
-  if (!reduce) playEntranceSound(ENTER_DELAY * 1000);
 
   startLoop();
 });
