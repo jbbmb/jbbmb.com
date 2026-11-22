@@ -1,7 +1,7 @@
 ## 🎨 Design Evolution
 <p align="center"><img src="static/assets/timeline.png"/></p>
 
-## 🍀 Contributors
+## ❤️ Contributors
 This project got a lot of love and support over the years from [Mário Matias](https://www.linkedin.com/in/jmamatias), [Francisco Araújo](https://www.linkedin.com/in/franciscoeparaujo), [Miguel Martins](https://instagram.com/miguelmartinsmm), [Mariana Preto](https://www.linkedin.com/in/mariana-preto), [Pedro Mouta](https://www.linkedin.com/in/pedro-mouta-52080124a) and [Ana Júlia Torres](https://www.linkedin.com/in/ana-júlia-torres-7b7b0130a/).
 
 ## 🔌 Service Status
@@ -20,7 +20,7 @@ Under the General Data Protection Regulation, You have the right to request acce
  
 João reserves the right to update this policy at any time. Continued use of the website constitutes acceptance of any changes. GoatCounter's own policy is available at [goatcounter.com/privacy](https://www.goatcounter.com/privacy). Please review both policies periodically to stay informed.
 
-## 📌 Copyright
+## 🌍 Copyright
 All rights reserved unless otherwise stated. This website incorporates original work created by João de Macedo Borges and select open-source or public resources used in compliance with their respective licenses:
 * Inter Typeface, designed by Rasmus Andersson and used under the MIT License.
 * Background Animation, adapted from the public CodePen of @jp-arts and used non-commercially.
