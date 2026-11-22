@@ -34,7 +34,6 @@ const getMonthBasedIntro = () => {
 const phrases = [
   "Homo Sapiens specimen in his late 20s.",
   getTimeBasedIntro,
-  getMonthBasedIntro,
   "Currently lives in the city of Porto.",
   "Born in northern Portugal, Earth.",
   "Raised in a big family with no religion.",
@@ -60,6 +59,7 @@ const phrases = [
   "Believes in climate change and vaccines.",
   "Votes every time there is an election.",
   "Overthinks a lot, including this sentence.",
+  getMonthBasedIntro,
   "Thanks You for visiting."
 ];
 
