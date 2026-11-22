@@ -122,6 +122,7 @@ class TextScramble {
     }
     cancelAnimationFrame(this.frameRequest);
     this.frame = 0;
+    this.element.setAttribute("aria-busy", "true"); // screen readers wait for the final text, not the 0s and 1s
     this.update();
     return promise;
   }
@@ -144,7 +145,10 @@ class TextScramble {
       }
     }
     this.element.innerHTML = output;
-    if (complete === this.queue.length) this.resolve();
+    if (complete === this.queue.length) {
+      this.element.setAttribute("aria-busy", "false");
+      this.resolve();
+    }
     else {
       this.frameRequest = requestAnimationFrame(this.update);
       this.frame++;
@@ -526,9 +530,11 @@ function createBackground({ reduce, getOrigin }) {
   canvas.addEventListener("webglcontextlost", e => e.preventDefault());
   canvas.addEventListener("webglcontextrestored", () => { if (init()) dirty = true; });
   new ResizeObserver(() => { if (gl && !gl.isContextLost()) resize(); }).observe(canvas);
-  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { // live switch, no reload
-    if (gl && !gl.isContextLost()) { applyColors(); dirty = true; paint(); }
-  });
+  for (const q of ["(prefers-color-scheme: dark)", "(prefers-contrast: more)"]) {
+    matchMedia(q).addEventListener("change", () => { // live switch, no reload
+      if (gl && !gl.isContextLost()) { applyColors(); dirty = true; paint(); }
+    });
+  }
   draw(0); // paint straight away so there is no black flash before the first frame
 
   /* Quality guard: if the entrance runs below ~40 fps, drop the render resolution one step (down to 1x) */

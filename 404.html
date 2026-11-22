@@ -15,7 +15,7 @@
   <meta name="msapplication-TileColor" content="#0e0e10">
   <meta name="msapplication-TileImage" content="/static/favicons/web-app-manifest-192x192.png">
   <meta name="theme-color" content="#0e0e10">
-  <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark), (prefers-contrast: more)">
   <link rel="manifest" href="/manifest.json">
   <!-- Straight back to the home page; it shows "The requested page was not found!" for a few seconds (?404) -->
   <meta http-equiv="refresh" content="0;url=https://jbbmb.com/?404">
@@ -42,7 +42,7 @@
       text-decoration: none;
     }
 
-    @media (prefers-color-scheme: dark) {
+    @media (prefers-color-scheme: dark), (prefers-contrast: more) {
 
       html,
       body {

@@ -11,6 +11,7 @@
   <meta property="og:title" content="João de Macedo Borges" />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://jbbmb.com" />
+  <meta property="og:description" content="Homo Sapiens specimen in his late 20s." />
   <meta property="og:image" content="https://jbbmb.com/static/favicons/avatar-touch-icon.png" />
   <meta name="description"
     content="Homo Sapiens specimen in his late 20s based in Porto, Portugal. Studies software and cybersecurity, values privacy, UX design, and believes in meaningful work and integrated technology.">
@@ -50,8 +51,10 @@
   <meta name="msapplication-TileColor" content="#0e0e10">
   <meta name="msapplication-TileImage" content="static/favicons/web-app-manifest-192x192.png">
   <meta name="theme-color" content="#0e0e10">
-  <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark), (prefers-contrast: more)">
   <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Johnny">
+  <meta name="application-name" content="Johnny">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="manifest" href="manifest.json">
@@ -72,7 +75,7 @@
     }
 
     /* System dark mode: true black (the standard look above stays for everything else) */
-    @media (prefers-color-scheme: dark) {
+    @media (prefers-color-scheme: dark), (prefers-contrast: more) {
       :root {
         --bkg: #000000;
         --chrome: #000000;
@@ -153,6 +156,16 @@
 
       100% {
         filter: blur(3px);
+      }
+    }
+
+    @keyframes clickBlurSoft {
+      0% {
+        filter: blur(.5px);
+      }
+
+      100% {
+        filter: blur(2px);
       }
     }
 
@@ -554,6 +567,50 @@
         animation: onHoverBounce .5s var(--effect-timing), clickBlur .5s var(--effect-timing);
         transform: scale(1.2);
         filter: blur(3px);
+      }
+    }
+
+    /* HDR press, tuned down. With dynamic-range-limit: no-limit the SDR brightness boost on the glass is no longer
+       clamped (a white photo x 2.2 turns into a blob brighter than the white icon), so the icon vanished. In HDR
+       the glow comes from the shadow and the edge light instead; the glass is only lifted a little, the white
+       wash on touch is lighter, and the icon blurs less so it stays readable. */
+    @media (dynamic-range: high) {
+      @supports (color: color(rec2100-pq 1 1 1)) {
+        .bubbles .bubble.pressed .glass-filter {
+          filter: brightness(1.15) saturate(1.2);
+        }
+
+        .bubbles .bubble.pressed .glass-content img {
+          filter: blur(2px);
+        }
+
+        .bubbles .bubble.pressed .glass-specular {
+          box-shadow: inset 0 0 10px color(rec2100-pq .62 .62 .62 / .5), inset 1px 1px 1px color(rec2100-pq .7 .7 .7 / .8), inset -1px -1px 1px color(rec2100-pq .6 .6 .6 / .6);
+        }
+      }
+    }
+
+    @media (dynamic-range: high) and (hover: none) {
+      @supports (color: color(rec2100-pq 1 1 1)) {
+        .bubbles .bubble.pressed {
+          background: radial-gradient(100px circle at 50% 50%, rgba(255, 255, 255, .25) 0%, rgba(255, 255, 255, .08) 30%, rgba(255, 255, 255, 0) 60%);
+        }
+      }
+    }
+
+    @media (dynamic-range: high) and (prefers-reduced-motion: no-preference) {
+      @supports (color: color(rec2100-pq 1 1 1)) {
+        .bubbles .bubble.pressed .glass-content img {
+          animation: clickBounce .5s var(--effect-timing), clickBlurSoft .5s var(--effect-timing);
+        }
+      }
+    }
+
+    @media (dynamic-range: high) and (hover: none) and (prefers-reduced-motion: no-preference) {
+      @supports (color: color(rec2100-pq 1 1 1)) {
+        .bubbles .bubble.pressed .glass-content img {
+          animation: onHoverBounce .5s var(--effect-timing), clickBlurSoft .5s var(--effect-timing);
+        }
       }
     }
 
