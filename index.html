@@ -335,6 +335,37 @@
       }
     }
 
+    /* Tiny screens (a watch, or any small square-ish window up to 400 x 400): no room for the signature and the
+       tagline, so the bubbles get the whole screen. The top section stays in the page for screen readers, only
+       taken out of sight and out of the layout. */
+    @media (max-width: 240px), (max-height: 200px), (max-width: 400px) and (max-height: 400px) {
+      .page-content {
+        flex-direction: column;
+        justify-content: center;
+        gap: 0;
+        padding: max(.5rem, env(safe-area-inset-top)) max(.5rem, env(safe-area-inset-right)) max(.5rem, env(safe-area-inset-bottom)) max(.5rem, env(safe-area-inset-left));
+      }
+
+      .bubbles {
+        --S: min(calc(100vw - 1rem), calc(100vh - 1rem), 520px);
+      }
+
+      @supports (height: 100dvh) {
+        .bubbles {
+          --S: min(calc(100vw - 1rem), calc(100dvh - 1rem), 520px);
+        }
+      }
+
+      .top-section {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+        white-space: nowrap;
+      }
+    }
+
     .bubble-avatar {
       position: absolute;
       left: 50%;
