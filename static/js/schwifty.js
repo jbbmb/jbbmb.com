@@ -17,7 +17,7 @@ const getTimeBasedIntro = () => {
 };
 
 const getMonthBasedIntro = () => {
-  const month = new Date().getMonth();
+  const month = new Date().getMonth(); // 0 = January
   if (month === 11) {
     return "Wishes you a happy holiday season.";
   } else if (month <= 1) {
@@ -34,6 +34,7 @@ const getMonthBasedIntro = () => {
 const phrases = [
   "Homo Sapiens specimen in his late 20s.",
   getTimeBasedIntro,
+  getMonthBasedIntro,
   "Currently lives in the city of Porto.",
   "Born in northern Portugal, Earth.",
   "Raised in a big family with no religion.",
@@ -59,7 +60,6 @@ const phrases = [
   "Believes in climate change and vaccines.",
   "Votes every time there is an election.",
   "Overthinks a lot, including this sentence.",
-  getMonthBasedIntro,
   "Thanks You for visiting."
 ];
 
@@ -615,10 +615,35 @@ function createIntro({ el, getGeometry, at }) {
 }
 
 /* ==========================================================================
+   Images that fail to load (blocked, a format the browser cannot decode, offline)
+   The failed image's container gets .img-failed, and the stylesheet shows text in its place: the initials on the
+   avatar, the name on a bubble, the name where the signature goes. Nothing happens when every image loads.
+   ========================================================================== */
+function watchImages() {
+  const failed = img => {
+    const box = img.parentElement;
+    if (!box) return;
+    box.classList.add("img-failed");
+    const bubble = box.closest(".bubble");
+    if (bubble) box.dataset.fb = bubble.dataset.name || bubbleNames[bubble.id] || "";
+  };
+  const sweep = () => { for (const img of document.images) if (!img.naturalWidth) failed(img); };
+  for (const img of document.images) {
+    if (img.complete) { if (!img.naturalWidth) failed(img); }
+    else img.addEventListener("error", () => failed(img), { once: true });
+  }
+  /* Some browsers never request the images at all (Safari with "Disable Images") and so never fire "error":
+     by the window's load event every image is either loaded or it is not going to be. */
+  if (document.readyState === "complete") sweep();
+  else addEventListener("load", sweep, { once: true });
+}
+
+/* ==========================================================================
    Bubbles (the former .glass-icon tiles)
    Orbit, entrance and "closer to the user" motion, plus the original interaction logic.
    ========================================================================== */
 document.addEventListener("DOMContentLoaded", () => {
+  watchImages();
   const field = document.getElementById("bubbles");
   const avatar = document.getElementById("bubble-avatar");
   if (!field || !avatar) return;

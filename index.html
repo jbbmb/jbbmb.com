@@ -353,6 +353,50 @@
       z-index: calc(12 + var(--k, 0));
     }
 
+    /* ---- When an image fails to load (see watchImages in schwifty.js): text takes its place ---- */
+    .img-failed>img {
+      display: none;
+    }
+
+    .bubble-avatar.img-failed {
+      display: grid;
+      place-items: center;
+    }
+
+    .bubble-avatar.img-failed::before {
+      content: "JBBMB";
+      color: var(--accent-color);
+      font-weight: 700;
+      font-size: calc(var(--av) * .2);
+      letter-spacing: .02em;
+    }
+
+    .glass-content.img-failed {
+      container-type: inline-size;
+    }
+
+    .glass-content.img-failed::after {
+      content: attr(data-fb);
+      color: #fff;
+      font-weight: 600;
+      font-size: 22cqw;
+      white-space: nowrap;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, .5);
+    }
+
+    #copyright .glass-content.img-failed::after {
+      content: "About";
+    }
+
+    .top-section.img-failed::before {
+      content: "João de Macedo Borges";
+      font-weight: 700;
+      display: block;
+      font-size: 1.5rem;
+      line-height: 1.5;
+      margin-bottom: .25rem;
+    }
+
     .bubble-slot.on {
       z-index: 20;
     }
