@@ -50,6 +50,7 @@
   <meta name="msapplication-TileColor" content="#0e0e10">
   <meta name="msapplication-TileImage" content="static/favicons/web-app-manifest-192x192.png">
   <meta name="theme-color" content="#0e0e10">
+  <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -68,6 +69,14 @@
       --bkg: #1C1C1E;
       --chrome: #0e0e10;
       --effect-timing: ease;
+    }
+
+    /* System dark mode: true black (the standard look above stays for everything else) */
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bkg: #000000;
+        --chrome: #000000;
+      }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -623,7 +632,7 @@
       <img src="static/assets/signature.webp"
         srcset="static/assets/signature-480.webp 480w, static/assets/signature-640.webp 640w, static/assets/signature-800.webp 800w, static/assets/signature.webp 1200w"
         sizes="(min-width: 460px) 400px, calc((100vw - 40px) * .9)" class="logo" width="1200" height="236"
-        fetchpriority="high" alt="João de Macedo Borges" title="This is not my legal signature">
+        fetchpriority="high" alt="João de Macedo Borges" title="This is not my legal signature.">
       <div>
         <p id="greeting" aria-live="polite"></p>
         <p id="description" aria-live="polite"></p>

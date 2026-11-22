@@ -16,6 +16,21 @@ const getTimeBasedIntro = () => {
   }
 };
 
+const getMonthBasedIntro = () => {
+  const month = new Date().getMonth();
+  if (month === 11) {
+    return "Wishes you a happy holiday season.";
+  } else if (month <= 1) {
+    return "Wishes you a happy winter.";
+  } else if (month <= 4) {
+    return "Wishes you a happy spring.";
+  } else if (month <= 7) {
+    return "Wishes you a happy summer.";
+  } else {
+    return "Wishes you a happy autumn.";
+  }
+};
+
 const phrases = [
   "Homo Sapiens specimen in his late 20s.",
   getTimeBasedIntro,
@@ -44,6 +59,7 @@ const phrases = [
   "Believes in climate change and vaccines.",
   "Votes every time there is an election.",
   "Overthinks a lot, including this sentence.",
+  getMonthBasedIntro,
   "Thanks You for visiting."
 ];
 
@@ -372,9 +388,11 @@ function createBackground({ reduce, getOrigin }) {
       vec4 l2 = pm(vec3(20.0, 20.0, 22.0) / 255.0, 0.5);
       vec4 ls = y < 0.38 ? vec4(0.0) : (y < 0.68 ? mix(vec4(0.0), l1, (y - 0.38) / 0.30) : mix(l1, l2, clamp((y - 0.68) / 0.32, 0.0, 1.0)));
       vec4 sc = (rs + ls * (1.0 - rs.a)) * uScrim;
+      float k = clamp(uBkg.r * 255.0 / 28.0, 0.0, 1.0); // a true black page stays true black: the vignette only darkens it
+      sc.rgb *= k;
       col = sc.rgb + col * (1.0 - sc.a);
 
-      col += (hash(gl_FragCoord.xy) - 0.5) / 255.0; // dither: no banding in the dark gradients
+      col += (hash(gl_FragCoord.xy) - 0.5) / 255.0 * k; // dither: no banding in the dark gradients
       gl_FragColor = vec4(col, 1.0);
     }`;
 
@@ -385,9 +403,19 @@ function createBackground({ reduce, getOrigin }) {
     const n = parseInt(m ? m[1] : fallback, 16);
     return [(n >> 16 & 255) / 255, (n >> 8 & 255) / 255, (n & 255) / 255];
   };
-  const bkg = hex("--bkg", "1C1C1E");
-  const accent = hex("--accent-color", "fc9e0e");
-  const c2 = bkg.map((v, i) => v + (accent[i] - v) * 0.34); // color-mix(accent 34%, bkg)
+  let bkg, accent, c2;
+  function readColors() {
+    bkg = hex("--bkg", "1C1C1E");
+    accent = hex("--accent-color", "fc9e0e");
+    c2 = bkg.map((v, i) => v + (accent[i] - v) * 0.34); // color-mix(accent 34%, bkg)
+  }
+  function applyColors() {
+    readColors();
+    gl.uniform3fv(U.uBkg, bkg);
+    gl.uniform3fv(U.uC2, c2);
+    gl.uniform3fv(U.uC3, accent);
+  }
+  readColors();
 
   const canvas = document.createElement("canvas");
   canvas.id = "bg";
@@ -440,9 +468,7 @@ function createBackground({ reduce, getOrigin }) {
     for (const n of ["uRes", "uDpr", "uView", "uOrigin", "uCs", "uGrow", "uReveal", "uFeather", "uScrim", "uL", "uBkg", "uC2", "uC3"]) {
       U[n] = gl.getUniformLocation(prog, n);
     }
-    gl.uniform3fv(U.uBkg, bkg);
-    gl.uniform3fv(U.uC2, c2);
-    gl.uniform3fv(U.uC3, accent);
+    applyColors();
     resize();
     return true;
   }
@@ -500,6 +526,9 @@ function createBackground({ reduce, getOrigin }) {
   canvas.addEventListener("webglcontextlost", e => e.preventDefault());
   canvas.addEventListener("webglcontextrestored", () => { if (init()) dirty = true; });
   new ResizeObserver(() => { if (gl && !gl.isContextLost()) resize(); }).observe(canvas);
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { // live switch, no reload
+    if (gl && !gl.isContextLost()) { applyColors(); dirty = true; paint(); }
+  });
   draw(0); // paint straight away so there is no black flash before the first frame
 
   /* Quality guard: if the entrance runs below ~40 fps, drop the render resolution one step (down to 1x) */

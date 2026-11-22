@@ -32,6 +32,14 @@ body {
   background-size: auto, 60px 60px;
 }
 
+/* ---- System dark mode: true black. The soft vignette would only grey it, so it goes ---- */
+@media (prefers-color-scheme: dark) {
+  body {
+    background-image: radial-gradient(circle, rgba(252, 158, 14, .2) 1.5px, transparent 2px);
+    background-size: 60px 60px;
+  }
+}
+
 /* ---- Avatar: its size comes from the field (the script normally sets --av), centred by style.css ---- */
 .bubbles {
   --av: calc(var(--S) / 2.5);

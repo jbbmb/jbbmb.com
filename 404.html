@@ -15,10 +15,11 @@
   <meta name="msapplication-TileColor" content="#0e0e10">
   <meta name="msapplication-TileImage" content="/static/favicons/web-app-manifest-192x192.png">
   <meta name="theme-color" content="#0e0e10">
+  <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
   <link rel="manifest" href="/manifest.json">
   <!-- Straight back to the home page; it shows "The requested page was not found!" for a few seconds (?404) -->
   <meta http-equiv="refresh" content="0;url=https://jbbmb.com/?404">
-  <!-- Same dark page as the home page, so nothing flashes white while it redirects -->
+  <!-- Same dark page as the home page (true black in system dark mode), so nothing flashes white while it redirects -->
   <style>
     :root {
       color-scheme: dark;
@@ -39,6 +40,14 @@
       color: #fff;
       font: 16px/1.4 system-ui, sans-serif;
       text-decoration: none;
+    }
+
+    @media (prefers-color-scheme: dark) {
+
+      html,
+      body {
+        background: #000;
+      }
     }
   </style>
 </head>
