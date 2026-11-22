@@ -75,7 +75,8 @@
     }
 
     /* System dark mode: true black (the standard look above stays for everything else) */
-    @media (prefers-color-scheme: dark), (prefers-contrast: more) {
+    @media (prefers-color-scheme: dark),
+    (prefers-contrast: more) {
       :root {
         --bkg: #000000;
         --chrome: #000000;
@@ -338,7 +339,9 @@
     /* Tiny screens (a watch, or any small square-ish window up to 400 x 400): no room for the signature and the
        tagline, so the bubbles get the whole screen. The top section stays in the page for screen readers, only
        taken out of sight and out of the layout. */
-    @media (max-width: 240px), (max-height: 200px), (max-width: 400px) and (max-height: 400px) {
+    @media (max-width: 240px),
+    (max-height: 200px),
+    (max-width: 400px) and (max-height: 400px) {
       .page-content {
         flex-direction: column;
         justify-content: center;
@@ -703,7 +706,14 @@
 <body>
   <main class="page-content">
     <nav class="bubbles" id="bubbles" aria-label="Links">
-      <div class="bubble-avatar" id="bubble-avatar"><picture><source type="image/webp" srcset="static/assets/avatar-256.webp 256w, static/assets/avatar-384.webp 384w, static/assets/avatar.webp 512w" sizes="min(208px, calc((100vw - 40px) / 2.5))"><img src="static/favicons/avatar-touch-icon.png" width="512" height="512" alt="" fetchpriority="high" decoding="async"></picture></div>
+      <div class="bubble-avatar" id="bubble-avatar">
+        <picture>
+          <source type="image/webp"
+            srcset="static/assets/avatar-256.webp 256w, static/assets/avatar-384.webp 384w, static/assets/avatar.webp 512w"
+            sizes="min(208px, calc((100vw - 40px) / 2.5))"><img src="static/favicons/avatar-touch-icon.png" width="512"
+            height="512" alt="" fetchpriority="high" decoding="async">
+        </picture>
+      </div>
       <a href="https://www.linkedin.com/in/jbbmb" target="_self" id="linkedin" class="bubble" tabindex="0"
         aria-label="Documents his career on LinkedIn." data-slot="5" data-z="0.5" data-r="0.55">
         <div class="glass-filter"></div>

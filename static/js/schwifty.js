@@ -229,7 +229,7 @@ function handleExternalRedirect(route) {
     showActionNotification(config.message, 3500);
     window.open(config.url, "_self");
   } else {
-    showActionNotification("The requested page was not found!", 3500);
+    showActionNotification("The requested page was not found.", 3500);
   }
 }
 
